@@ -1,0 +1,213 @@
+.fighters-form {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .form-group {
+    flex: 1;
+  }
+  
+  .versus-divider {
+    font-size: 24px;
+    font-weight: bold;
+    color: #f44336;
+  }
+  
+  .fighters-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .fighter {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .fighter-placeholder {
+    opacity: 0.5;
+  }
+  
+  .character-avatar-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: #e0e0e0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .versus-icon {
+    font-size: 32px;
+    font-weight: bold;
+    color: #f44336;
+    padding: 0 30px;
+  }
+  
+  .fight-actions {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .fight-result {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .result-header {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .result-header.victory-1 {
+    background-color: rgba(63, 81, 181, 0.2);
+    border: 1px solid #3f51b5;
+  }
+  
+  .result-header.victory-2 {
+    background-color: rgba(244, 67, 54, 0.2);
+    border: 1px solid #f44336;
+  }
+  
+  .result-title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .combatants {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .fighter-info {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .vs {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 0 20px;
+  }
+  
+  .health-display {
+    margin-top: 10px;
+  }
+  
+  .health-bar {
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  
+  .health-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  
+  .health-fill.fighter-1 {
+    background-color: #3f51b5;
+  }
+  
+  .health-fill.fighter-2 {
+    background-color: #f44336;
+  }
+  
+  .battle-rounds {
+    margin-top: 30px;
+  }
+  
+  .rounds-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px;
+  }
+  
+  .round {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .round:last-child {
+    border-bottom: none;
+  }
+  
+  .round-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .initiative {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 5px;
+  }
+  
+  .damage {
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 5px 0;
+  }
+  
+  .player1-damage {
+    background-color: rgba(63, 81, 181, 0.1);
+    border-left: 3px solid #3f51b5;
+  }
+  
+  .player2-damage {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid #f44336;
+  }
+  
+  .round-winner {
+    font-weight: bold;
+    color: #4caf50;
+    margin-top: 5px;
+  }
+  
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    .fighters-form {
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .versus-divider {
+      margin: 10px 0;
+    }
+    
+    .fighters-preview {
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .versus-icon {
+      margin: 20px 0;
+    }
+  }

@@ -1,0 +1,64 @@
+<div class="inventory-container">
+    <h2>{{ characterName }}'s Inventory</h2>
+  
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border"></div>
+      <p>Loading inventory...</p>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  
+    <div class="inventory-actions mb-3">
+      <a routerLink="/add-item" class="btn btn-success">Add New Item</a>
+    </div>
+  
+    <table *ngIf="!loading && items.length > 0" class="table table-striped inventory-table">
+      <thead>
+        <tr>
+          <th (click)="onSort('item_name')" class="sortable">
+            Name
+            <i *ngIf="sortBy === 'item_name'" 
+               class="fa" 
+               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          </th>
+          <th (click)="onSort('item_type')" class="sortable">
+            Type
+            <i *ngIf="sortBy === 'item_type'" 
+               class="fa" 
+               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          </th>
+          <th (click)="onSort('item_quantity')" class="sortable">
+            Quantity
+            <i *ngIf="sortBy === 'item_quantity'" 
+               class="fa" 
+               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of items">
+          <td>{{ item.name }}</td>
+          <td>{{ item.typeName }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>
+            <div class="btn-group">
+              <button *ngIf="isConsumable(item.typeName)" 
+                      (click)="consumeItem(item.id!)" 
+                      class="btn btn-sm btn-success">
+                Use
+              </button>
+              <a [routerLink]="['/edit', item.id]" class="btn btn-sm btn-primary">Edit</a>
+              <button (click)="deleteItem(item.id!)" class="btn btn-sm btn-danger">Delete</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <div *ngIf="!loading && items.length === 0" class="alert alert-info">
+      Your inventory is empty. Add some items to get started!
+    </div>
+  </div>

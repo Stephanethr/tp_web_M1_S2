@@ -1,0 +1,92 @@
+<div class="board-game-container">
+    <h2>Board Game</h2>
+  
+    <div *ngIf="loading && !gameState" class="text-center">
+      <div class="spinner-border"></div>
+      <p>Setting up the game board...</p>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="gameState" class="game-interface">
+      <div class="game-header">
+        <div class="player-info">
+          <h3>{{ gameState.hero.name }}</h3>
+          <div class="player-stats">
+            <div class="stat">
+              <span>Health:</span> 
+              <div class="health-bar">
+                <div 
+                  class="health-fill" 
+                  [style.width.%]="(gameState.hero.health / 100) * 100">
+                </div>
+                <span class="health-text">{{ gameState.hero.health }}/100</span>
+              </div>
+            </div>
+            <div class="stat">
+              <span>Attack:</span> {{ gameState.hero.attack }}
+            </div>
+            <div class="stat">
+              <span>Defense:</span> {{ gameState.hero.defense }}
+            </div>
+          </div>
+        </div>
+  
+        <div class="game-controls">
+          <button 
+            *ngIf="!gameFinished" 
+            [disabled]="loading" 
+            (click)="playTurn()" 
+            class="btn btn-primary roll-btn">
+            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+            Roll Dice
+          </button>
+          <button 
+            *ngIf="gameFinished" 
+            (click)="restartGame()" 
+            class="btn btn-success">
+            Play Again
+          </button>
+          <a routerLink="/character/profile" class="btn btn-secondary">Back to Profile</a>
+        </div>
+  
+        <div *ngIf="diceRoll" class="dice-result">
+          <div class="dice">
+            <span>{{ diceRoll }}</span>
+          </div>
+        </div>
+      </div>
+  
+      <div class="game-board">
+        <div 
+          *ngFor="let cell of gameState.board; let i = index" 
+          class="board-cell"
+          [ngClass]="[getBoardElementClass(cell, i), getPositionClass(i)]">
+          
+          <div class="cell-content">
+            <span *ngIf="cell?.type === 'enemy'" class="enemy-icon">👹</span>
+            <span *ngIf="cell?.type === 'item'" class="item-icon">🎁</span>
+            <span *ngIf="!cell" class="empty-icon">•</span>
+          </div>
+          
+          <div class="position-marker">
+            {{ i + 1 }}
+          </div>
+        </div>
+      </div>
+  
+      <div class="game-log">
+        <h4>Game Log - Turn {{ currentTurn }}</h4>
+        <div class="log-entries">
+          <div *ngFor="let entry of gameLog" class="log-entry">
+            {{ entry }}
+          </div>
+          <div *ngIf="gameLog.length === 0" class="empty-log">
+            The game has begun. Roll the dice to start your adventure!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

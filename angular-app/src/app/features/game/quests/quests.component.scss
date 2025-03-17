@@ -1,0 +1,190 @@
+.quests-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .quests-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .quest-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .quest-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quest-card.selected {
+    border: 2px solid #3f51b5;
+  }
+  
+  .quest-description {
+    margin: 10px 0;
+    color: #555;
+  }
+  
+  .quest-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 15px 0;
+  }
+  
+  .detail {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .detail-label {
+    font-weight: bold;
+    color: #777;
+  }
+  
+  .text-success {
+    color: #4caf50;
+  }
+  
+  .text-warning {
+    color: #ff9800;
+  }
+  
+  .text-danger {
+    color: #f44336;
+  }
+  
+  .fight-result {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-top: 20px;
+  }
+  
+  .result-header {
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .result-header.victory {
+    background-color: rgba(76, 175, 80, 0.2);
+    border: 1px solid #4caf50;
+  }
+  
+  .result-header.defeat {
+    background-color: rgba(244, 67, 54, 0.2);
+    border: 1px solid #f44336;
+  }
+  
+  .result-title {
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .combatants {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .hero-info, .enemy-info {
+    flex: 1;
+    text-align: center;
+  }
+  
+  .vs {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 0 20px;
+  }
+  
+  .health-display {
+    margin-top: 10px;
+  }
+  
+  .health-bar {
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+  }
+  
+  .health-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  
+  .health-fill.hero {
+    background-color: #4caf50;
+  }
+  
+  .health-fill.enemy {
+    background-color: #f44336;
+  }
+  
+  .battle-rounds {
+    margin-top: 30px;
+  }
+  
+  .rounds-container {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 10px;
+  }
+  
+  .round {
+    padding: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .round:last-child {
+    border-bottom: none;
+  }
+  
+  .round-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .damage {
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin: 5px 0;
+  }
+  
+  .hero-damage {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 3px solid #4caf50;
+  }
+  
+  .enemy-damage {
+    background-color: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid #f44336;
+  }
+  
+  .round-winner {
+    font-weight: bold;
+    color: #3f51b5;
+    margin-top: 5px;
+  }
+  
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }

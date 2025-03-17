@@ -1,0 +1,52 @@
+<div class="character-list-container">
+    <h2>Your Characters</h2>
+  
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border"></div>
+      <p>Loading characters...</p>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="!loading && characters.length === 0" class="alert alert-info">
+      You don't have any characters yet. Create one to start playing!
+    </div>
+  
+    <div class="characters-grid">
+      <div *ngFor="let character of characters" 
+           class="character-card" 
+           [ngClass]="{'active': character.id === activeCharacterId}">
+        
+        <div class="character-header">
+          <h3>{{ character.name }}</h3>
+          <span class="badge badge-primary">Level {{ character.level }}</span>
+        </div>
+  
+        <div class="character-details">
+          <p><strong>Race:</strong> {{ getRaceDisplay(character.race) }}</p>
+          <p><strong>Class:</strong> {{ getClassDisplay(character.type) }}</p>
+          <p><strong>Health:</strong> {{ character.health }}</p>
+          <p><strong>Attack:</strong> {{ character.attack }}</p>
+          <p><strong>Defense:</strong> {{ character.defense }}</p>
+        </div>
+  
+        <div class="character-actions">
+          <button 
+            *ngIf="character.id !== activeCharacterId"
+            (click)="selectCharacter(character)" 
+            class="btn btn-primary">
+            Select
+          </button>
+          <span *ngIf="character.id === activeCharacterId" class="active-text">
+            Active Character
+          </span>
+        </div>
+      </div>
+    </div>
+  
+    <div class="character-controls mt-4">
+      <a routerLink="/character/create" class="btn btn-success">Create New Character</a>
+    </div>
+  </div>
