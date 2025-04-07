@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
 
 // Auth
@@ -20,7 +19,7 @@ import { BoardGameComponent } from './features/game/board-game/board-game.compon
 import { QuestsComponent } from './features/game/quests/quests.component';
 import { VersusComponent } from './features/game/versus/versus.component';
 
-const routes: Routes = [
+export const routes: Routes = [
   // Auth routes
   { 
     path: 'login', 
@@ -100,9 +99,3 @@ const routes: Routes = [
     redirectTo: '/character/list' 
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }
