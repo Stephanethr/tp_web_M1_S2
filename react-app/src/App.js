@@ -21,8 +21,6 @@ import BoardGame from './components/game/BoardGame';
 import InventoryList from './components/inventory/InventoryList';
 import ItemEditor from './components/inventory/ItemEditor';
 
-//import './styles/game.css';
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
@@ -315,9 +313,7 @@ function App() {
 
   {/* Footer */}
   <footer className="bg-primary-500 text-white text-center py-3 mt-6">
-    <div className="container">
-      <p className="text-sm">© 2023 Bonk RPG - Tous droits réservés</p>
-    </div>
+    <p className="text-sm">© 2023 Bonk RPG - Tous droits réservés</p>
   </footer>
 </div>
 

@@ -58,84 +58,110 @@ function Register({ setIsAuthenticated }) {
   };
 
   return (
-    <div className="register-container">
-      <div className="card">
-        <div className="card-header bg-success text-white">
-          <h2 className="mb-0">Inscription</h2>
-        </div>
-        <div className="card-body">
-          {error && <div className="alert alert-danger">{error}</div>}
-          
-          <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label htmlFor="email" className="form-label">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="mb-3">
-              <label htmlFor="username" className="form-label">Nom d'utilisateur</label>
-              <input
-                type="text"
-                className="form-control"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label">Mot de passe</label>
-              <input
-                type="password"
-                className="form-control"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <div className="mb-3">
-              <label htmlFor="recheck_password" className="form-label">Confirmer le mot de passe</label>
-              <input
-                type="password"
-                className="form-control"
-                id="recheck_password"
-                name="recheck_password"
-                value={formData.recheck_password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            
-            <button 
-              type="submit" 
-              className="btn btn-success w-100"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Inscription...' : 'S\'inscrire'}
-            </button>
-          </form>
-          
-          <div className="mt-3 text-center">
-            <p>
-              Déjà inscrit ? <a href="/login">Se connecter</a>
-            </p>
-          </div>
-        </div>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+  <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    {/* Header */}
+    <div className="mb-6 text-center">
+      <h2 className="text-2xl font-bold text-green-500">Inscription</h2>
     </div>
+
+    {/* Error Message */}
+    {error && (
+      <div className="mb-4 px-4 py-2 text-sm text-white bg-red-500 rounded">
+        {error}
+      </div>
+    )}
+
+    {/* Formulaire */}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Champ Email */}
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          Email
+        </label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-gray-800 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Champ Nom d'utilisateur */}
+      <div>
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+          Nom d'utilisateur
+        </label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          value={formData.username}
+          onChange={handleChange}
+          required
+          className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-gray-800 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Champ Mot de passe */}
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          Mot de passe
+        </label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-gray-800 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Champ Confirmation du mot de passe */}
+      <div>
+        <label htmlFor="recheck_password" className="block text-sm font-medium text-gray-700 mb-1">
+          Confirmer le mot de passe
+        </label>
+        <input
+          type="password"
+          id="recheck_password"
+          name="recheck_password"
+          value={formData.recheck_password}
+          onChange={handleChange}
+          required
+          className="block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-gray-800 focus:ring-2 focus:ring-green-500 focus:outline-none"
+        />
+      </div>
+
+      {/* Bouton d'inscription */}
+      <button
+        type="submit"
+        className={`w-full px-4 py-2 text-white rounded-lg ${
+          isLoading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+        }`}
+        disabled={isLoading}
+      >
+        {isLoading ? "Inscription..." : "S'inscrire"}
+      </button>
+    </form>
+
+    {/* Lien vers connexion */}
+    <div className="mt-4 text-center">
+      <p className="text-sm text-gray-600">
+        Déjà inscrit ?{" "}
+        <a href="/login" className="text-green-500 hover:text-green-600 underline">
+          Se connecter
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
   );
 }
 
