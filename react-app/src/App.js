@@ -1,8 +1,27 @@
+import React from 'react';
+import {useState, useEffect} from 'react';
+import {BrowserRouter as Router, Routes, Route, Navigate, Link} from 'react-router-dom';
+import api from './services/api';
+
+// AUTH FILES
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
+
+// CHARACTER FILES
+import CharacterCreation from './components/character/CharacterCreation';
+import CharacterList from './components/character/CharacterList';
+import CharacterProfile from './components/character/CharacterProfile';
+
+// GAME FILES
+import QuestMode from './components/game/QuestMode';
+import VersusMode from './components/game/VersusMode';
+import BoardGame from './components/game/BoardGame';
+
+// INVENTORY FILES
 import InventoryList from './components/inventory/InventoryList';
 import ItemEditor from './components/inventory/ItemEditor';
-import { useState, useEffect } from 'react';
-import api from './services/api';
-import './styles/game.css';
+
+//import './styles/game.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,143 +53,274 @@ function App() {
 
   return (
     <Router>
-      <div className="App">
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-          <div className="container">
-            <Link className="navbar-brand" to="/">Bonk RPG</Link>
-            <button 
-              className="navbar-toggler" 
-              type="button" 
-              data-bs-toggle="collapse" 
-              data-bs-target="#navbarNav"
+      <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"></link>
+      <div className="App min-h-screen flex flex-col">
+  {/* Navigation */}
+  <nav className="bg-primary-500 text-white shadow-md">
+    <div className="container mx-auto px-4 flex items-center justify-between py-4">
+      <Link to="/" className="text-xl font-bold">
+        Bonk RPG
+      </Link>
+      <button
+        className="text-white md:hidden"
+        type="button"
+        aria-expanded="false"
+        aria-label="Afficher le menu"
+      >
+        <span className="material-icons">menu</span>
+      </button>
+      {/* Navigation Links */}
+      <div
+        className={`md:flex md:items-center md:space-x-4`}
+      >
+        <ul className="flex flex-col md:flex-row md:space-x-4">
+          {isAuthenticated ? (
+            <>
+              <li>
+                <Link
+                  to="/character-profile"
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Mon Profil
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/characters"
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Personnages
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/inventory"
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Inventaire
+                </Link>
+              </li>
+              <li className="group relative">
+                <button
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Jeux
+                </button>
+                <ul className="absolute hidden group-hover:block bg-white text-black shadow-md rounded mt-2">
+                  <li>
+                    <Link
+                      to="/quests"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Mode Quête
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/versus"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Mode Versus
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      to="/board-game"
+                      className="block px-4 py-2 hover:bg-gray-100"
+                    >
+                      Jeu de Plateau
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            </>
+          ) : (
+            <>
+              <li>
+                <Link
+                  to="/login"
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Connexion
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/register"
+                  className="block px-4 py-2 text-white rounded hover:bg-primary-600"
+                >
+                  Inscription
+                </Link>
+              </li>
+            </>
+          )}
+        </ul>
+        {isAuthenticated && user && (
+          <div className="mt-4 md:mt-0 flex items-center space-x-4">
+            <span className="text-sm">Bonjour, {user.username}</span>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                api
+                  .post("/logout")
+                  .then(() => {
+                    setIsAuthenticated(false);
+                    setUser(null);
+                  });
+              }}
             >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav me-auto">
-                {isAuthenticated ? (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/character-profile">Mon Profil</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/characters">Personnages</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/inventory">Inventaire</Link>
-                    </li>
-                    <li className="nav-item dropdown">
-                      <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                        Jeux
-                      </a>
-                      <ul className="dropdown-menu">
-                        <li><Link className="dropdown-item" to="/quests">Mode Quête</Link></li>
-                        <li><Link className="dropdown-item" to="/versus">Mode Versus</Link></li>
-                        <li><Link className="dropdown-item" to="/board-game">Jeu de Plateau</Link></li>
-                      </ul>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/login">Connexion</Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link" to="/register">Inscription</Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-              
-              {isAuthenticated && user && (
-                <div className="d-flex">
-                  <span className="navbar-text me-3">
-                    Bonjour, {user.username}
-                  </span>
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      api.post('/logout')
-                        .then(() => {
-                          setIsAuthenticated(false);
-                          setUser(null);
-                        });
-                    }}
-                  >
-                    <button type="submit" className="btn btn-outline-light btn-sm">
-                      Déconnexion
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
+              <button
+                type="submit"
+                className="px-4 py-2 text-sm text-primary-500 bg-white rounded hover:bg-gray-100"
+              >
+                Déconnexion
+              </button>
+            </form>
           </div>
-        </nav>
-
-        <div className="container mt-3">
-          <Routes>
-            <Route path="/login" element={
-              !isAuthenticated ? <Login setAuth={setIsAuthenticated} setUser={setUser} /> : <Navigate to="/" />
-            } />
-            <Route path="/register" element={
-              !isAuthenticated ? <Register setAuth={setIsAuthenticated} setUser={setUser} /> : <Navigate to="/" />
-            } />
-            
-            {/* Protected routes */}
-            <Route path="/" element={
-              isAuthenticated ? <Navigate to="/character-profile" /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/create-character" element={
-              isAuthenticated ? <CharacterCreation /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/characters" element={
-              isAuthenticated ? <CharacterList /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/character-profile" element={
-              isAuthenticated ? <CharacterProfile /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/board-game" element={
-              isAuthenticated ? <BoardGame /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/quests" element={
-              isAuthenticated ? <QuestMode /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/versus" element={
-              isAuthenticated ? <VersusMode /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/fight-result" element={
-              isAuthenticated ? <FightResult /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/inventory" element={
-              isAuthenticated ? <InventoryList /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/add-item" element={
-              isAuthenticated ? <ItemEditor isEditing={false} /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="/edit-item/:itemId" element={
-              isAuthenticated ? <ItemEditor isEditing={true} /> : <Navigate to="/login" />
-            } />
-            
-            <Route path="*" element={<div>Page non trouvée</div>} />
-          </Routes>
-        </div>
-        
-        <footer className="bg-primary text-white text-center py-3 mt-5">
-          <div className="container">
-            <p className="mb-0">© 2023 Bonk RPG - Tous droits réservés</p>
-          </div>
-        </footer>
+        )}
       </div>
+    </div>
+  </nav>
+
+  {/* Main Content */}
+  <main className="container mx-auto px-4 flex-grow mt-6">
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          !isAuthenticated ? (
+            <Login setAuth={setIsAuthenticated} setUser={setUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
+      />
+      <Route
+        path="/register"
+        element={
+          !isAuthenticated ? (
+            <Register setAuth={setIsAuthenticated} setUser={setUser} />
+          ) : (
+            <Navigate to="/" />
+          )
+        }
+      />
+      {/* Protected Routes */}
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/character-profile" />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/create-character"
+        element={
+          isAuthenticated ? (
+            <CharacterCreation />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/characters"
+        element={
+          isAuthenticated ? (
+            <CharacterList />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/character-profile"
+        element={
+          isAuthenticated ? (
+            <CharacterProfile />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/board-game"
+        element={
+          isAuthenticated ? (
+            <BoardGame />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/quests"
+        element={
+          isAuthenticated ? (
+            <QuestMode />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/versus"
+        element={
+          isAuthenticated ? (
+            <VersusMode />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          isAuthenticated ? (
+            <InventoryList />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/add-item"
+        element={
+          isAuthenticated ? (
+            <ItemEditor isEditing={false} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="/edit-item/:itemId"
+        element={
+          isAuthenticated ? (
+            <ItemEditor isEditing={true} />
+          ) : (
+            <Navigate to="/login" />
+          )
+        }
+      />
+      <Route
+        path="*"
+        element={<div>Page non trouvée</div>}
+      />
+    </Routes>
+  </main>
+
+  {/* Footer */}
+  <footer className="bg-primary-500 text-white text-center py-3 mt-6">
+    <div className="container">
+      <p className="text-sm">© 2023 Bonk RPG - Tous droits réservés</p>
+    </div>
+  </footer>
+</div>
+
     </Router>
   );
 }
