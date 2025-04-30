@@ -7,25 +7,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const userData = await checkAuth();
-        if (userData.success) {
-          setUser(userData.user);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
+// Dans votre AuthProvider ou composant racine
+useEffect(() => {
+  const verifyAuth = async () => {
+    try {
+      const authStatus = await checkAuth();
+      if (authStatus.authenticated) {
+        setUser(authStatus.user);
+        setIsAuthenticated(true);
+      } else {
+        // L'utilisateur n'est pas authentifié
         setUser(null);
-      } finally {
-        setLoading(false);
+        setIsAuthenticated(false);
       }
-    };
+    } catch (error) {
+      console.error('Erreur de vérification d\'authentification:', error);
+      // En cas d'erreur, considérer que l'utilisateur n'est pas authentifié
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false); // Indiquer que la vérification est terminée
+    }
+  };
 
-    initAuth();
-  }, []);
+  verifyAuth();
+}, []);
 
   const login = async (email, password) => {
     try {
@@ -76,6 +82,15 @@ export const AuthProvider = ({ children }) => {
       });
     }
   };
+
+  const setIsAuthenticated = (isAuthenticated) => {
+    if (user) {
+      setUser({
+        ...user,
+        isAuthenticated: isAuthenticated
+      });
+    }
+  }
 
   const value = {
     user,
