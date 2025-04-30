@@ -9,7 +9,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import CharacterCreate from './pages/CharacterCreate';
+import CharacterCreate from './pages/CreateCharacter';
 import CharacterList from './pages/CharacterList';
 import CharacterProfile from './pages/CharacterProfile';
 import Inventory from './pages/Inventory';
