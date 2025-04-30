@@ -1,0 +1,108 @@
+<div class="quests-container">
+    <h2>Quests</h2>
+  
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border"></div>
+      <p>Loading quest...</p>
+    </div>
+  
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+  
+    <div *ngIf="!showResult">
+      <div class="quests-list">
+        <div *ngFor="let quest of quests" class="quest-card" [class.selected]="selectedQuest === quest">
+          <h3>{{ quest.name }}</h3>
+          <p class="quest-description">{{ quest.description }}</p>
+          
+          <div class="quest-details">
+            <div class="detail">
+              <span class="detail-label">Difficulty:</span>
+              <span [ngClass]="getDifficultyClass(quest.difficulty)">{{ quest.difficulty }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Enemy Level:</span>
+              <span>{{ quest.enemyLevel }}</span>
+            </div>
+            <div class="detail">
+              <span class="detail-label">Reward:</span>
+              <span>{{ quest.reward }}</span>
+            </div>
+          </div>
+          
+          <button 
+            (click)="startQuest(quest)" 
+            class="btn btn-primary" 
+            [disabled]="loading">
+            Start Quest
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <div *ngIf="showResult && fightResult" class="fight-result">
+      <h3>Quest Result: {{ selectedQuest.name }}</h3>
+      
+      <div class="result-header" [ngClass]="fightResult.winner === fightResult.hero?.name ? 'victory' : 'defeat'">
+        <div class="result-title">
+          {{ fightResult.winner === fightResult.hero?.name ? 'Victory!' : 'Defeat!' }}
+        </div>
+      </div>
+      
+      <div class="combatants">
+        <div class="hero-info">
+          <h4>{{ fightResult.hero?.name }}</h4>
+          <div class="health-display">
+            <div class="health-bar">
+              <div class="health-fill hero" 
+                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].heroHealth / fightResult.hero?.originalHealth) * 100">
+              </div>
+            </div>
+            <span class="health-text">
+              {{ fightResult.rounds[fightResult.rounds.length-1].heroHealth }} / {{ fightResult.hero?.originalHealth }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="vs">VS</div>
+        
+        <div class="enemy-info">
+          <h4>{{ fightResult.monster?.name }}</h4>
+          <div class="health-display">
+            <div class="health-bar">
+              <div class="health-fill enemy" 
+                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].monsterHealth / fightResult.monster?.originalHealth) * 100">
+              </div>
+            </div>
+            <span class="health-text">
+              {{ fightResult.rounds[fightResult.rounds.length-1].monsterHealth }} / {{ fightResult.monster?.originalHealth }}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="battle-rounds">
+        <h4>Battle Log</h4>
+        <div class="rounds-container">
+          <div *ngFor="let round of fightResult.rounds" class="round">
+            <div class="round-header">Round {{ round.round }}</div>
+            <div *ngIf="round.damageToHero" class="damage enemy-damage">
+              {{ fightResult.monster?.name }} deals {{ round.damageToHero }} damage to {{ fightResult.hero?.name }}
+            </div>
+            <div *ngIf="round.damageToMonster" class="damage hero-damage">
+              {{ fightResult.hero?.name }} deals {{ round.damageToMonster }} damage to {{ fightResult.monster?.name }}
+            </div>
+            <div *ngIf="round.winner" class="round-winner">
+              {{ round.winner }} wins the battle!
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="result-actions">
+        <button (click)="resetQuest()" class="btn btn-primary">Back to Quests</button>
+        <a routerLink="/character/profile" class="btn btn-secondary">Character Profile</a>
+      </div>
+    </div>
+  </div>

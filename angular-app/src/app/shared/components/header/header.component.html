@@ -1,0 +1,29 @@
+<header class="main-header">
+    <div class="container">
+      <div class="logo">
+        <a routerLink="/">RPG Game</a>
+      </div>
+      
+      <nav class="main-nav">
+        <ng-container *ngIf="currentUser">
+          <a routerLink="/character/list" routerLinkActive="active">Characters</a>
+          <a *ngIf="currentUser.activeCharacterId" routerLink="/inventory" routerLinkActive="active">Inventory</a>
+          <a *ngIf="currentUser.activeCharacterId" routerLink="/game/board" routerLinkActive="active">Board Game</a>
+          <a *ngIf="currentUser.activeCharacterId" routerLink="/game/quests" routerLinkActive="active">Quests</a>
+          <a *ngIf="currentUser.activeCharacterId" routerLink="/game/versus" routerLinkActive="active">Versus</a>
+        </ng-container>
+      </nav>
+      
+      <div class="user-controls">
+        <ng-container *ngIf="currentUser; else loginLinks">
+          <span class="username">{{ currentUser.username }}</span>
+          <button (click)="logout()" class="btn btn-outline-light btn-sm">Logout</button>
+        </ng-container>
+        
+        <ng-template #loginLinks>
+          <a routerLink="/login" class="btn btn-outline-light btn-sm mr-2">Login</a>
+          <a routerLink="/register" class="btn btn-primary btn-sm">Register</a>
+        </ng-template>
+      </div>
+    </div>
+  </header>
