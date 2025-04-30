@@ -2,8 +2,12 @@ import axios from 'axios';
 
 // Configuration d'axios avec l'URL de base de l'API
 const API = axios.create({
-  baseURL: 'http://localhost:5000',
-  withCredentials: true // Pour permettre l'envoi de cookies pour l'authentification
+  baseURL: 'http://localhost:5000/api',  // Assurez-vous que c'est la bonne URL
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  withCredentials: true,  // Important pour les cookies de session
 });
 
 // Intercepteur pour gérer les erreurs globalement
@@ -270,20 +274,17 @@ export const getCharacterInfo = async () => {
 export const register = async (userData) => {
   try {
     const response = await API.post('/register', userData);
-    return {
-      success: true,
-      data: response.data
-    };
+    return response.data;
   } catch (error) {
+    // Capturer les erreurs de validation du backend
     if (error.response && error.response.data) {
-      return {
-        success: false,
-        errors: error.response.data
-      };
+      throw error.response.data;
     }
-    throw error;
+    // Erreur réseau ou autre
+    throw { success: false, errors: { general: "Erreur de connexion au serveur" } };
   }
 };
+
 
 // Cette fonction login était peut-être déjà présente
 export const login = async (email, password) => {
