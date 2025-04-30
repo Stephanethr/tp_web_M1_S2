@@ -1,383 +1,290 @@
 import axios from 'axios';
 
-// Configuration d'axios avec l'URL de base de l'API
-const API = axios.create({
-  baseURL: 'http://localhost:5000/api',  // Assurez-vous que c'est la bonne URL
+// Configuration de base pour axios
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
+// Créer une instance axios avec la configuration par défaut
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
   },
-  withCredentials: true,  // Important pour les cookies de session
+  withCredentials: true, // Important pour envoyer les cookies de session
 });
 
 // Intercepteur pour gérer les erreurs globalement
-API.interceptors.response.use(
-  response => response,
-  error => {
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Gérer les erreurs 401 (non authentifié)
     if (error.response && error.response.status === 401) {
-      // Rediriger vers la page de connexion si non authentifié
+      // Rediriger vers la page de login si nécessaire
       window.location.href = '/login';
     }
     return Promise.reject(error);
   }
 );
 
-export const logout = async () => {
-  try {
-    const response = await API.post('/logout');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+// Service API principal
+const apiService = {
+  // Vérification de l'état du serveur
+  healthCheck: async () => {
+    try {
+      const response = await axiosInstance.get('/health');
+      return response.data;
+    } catch (error) {
+      console.error('Health check failed:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const checkAuth = async () => {
-  try {
-    const response = await API.get('/check_auth');
-    return response.data;
-  } catch (error) {
-    return { success: false };
-  }
-};
-
-// Services pour les personnages
-export const getCharacterProfile = async () => {
-  try {
-    const response = await API.get('/game/character_profile');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // ==================== AUTHENTIFICATION ====================
+  
+  // Obtenir les informations de l'utilisateur courant
+  getCurrentUser: async () => {
+    try {
+      const response = await axiosInstance.get('/user/current');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const getCharacterList = async () => {
-  try {
-    const response = await API.get('/game/characters');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Se connecter
+  login: async (email, password) => {
+    try {
+      const response = await axiosInstance.post('/auth/login', { email, password });
+      return response.data;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const createCharacter = async (name, race, characterClass) => {
-  try {
-    const response = await API.post('/game/create_character', {
-      name,
-      race,
-      class: characterClass
-    });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // S'inscrire
+  register: async (userData) => {
+    try {
+      const response = await axiosInstance.post('/auth/register', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const selectCharacter = async (characterId) => {
-  try {
-    const response = await API.post(`/game/select_character/${characterId}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Se déconnecter
+  logout: async () => {
+    try {
+      const response = await axiosInstance.post('/auth/logout');
+      return response.data;
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Services pour l'inventaire
-export const getInventory = async (sortBy = 'item_name', order = 'asc') => {
-  try {
-    const response = await API.get(`/inventory?sort_by=${sortBy}&order=${order}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // ==================== PERSONNAGES ====================
+  
+  // Récupérer tous les personnages de l'utilisateur
+  getCharacters: async () => {
+    try {
+      const response = await axiosInstance.get('/characters');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get characters:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const addItem = async (name, typeId, quantity) => {
-  try {
-    const response = await API.post('/add_item', { 
-      name, 
-      type_id: typeId, 
-      quantity 
-    });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Récupérer un personnage spécifique
+  getCharacter: async (characterId) => {
+    try {
+      const response = await axiosInstance.get(`/characters/${characterId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get character ${characterId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const editItem = async (itemId, name, typeId, quantity) => {
-  try {
-    const response = await API.post(`/edit/${itemId}`, {
-      name,
-      type_id: typeId,
-      quantity
-    });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Créer un nouveau personnage
+  createCharacter: async (characterData) => {
+    try {
+      const response = await axiosInstance.post('/characters', characterData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to create character:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const deleteItem = async (itemId) => {
-  try {
-    const response = await API.post(`/delete/${itemId}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Sélectionner un personnage comme personnage actif
+  selectCharacter: async (characterId) => {
+    try {
+      const response = await axiosInstance.post(`/characters/${characterId}/select`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to select character ${characterId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const consumeItem = async (itemId) => {
-  try {
-    const response = await API.post(`/consume/${itemId}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // ==================== QUÊTES ====================
+  
+  // Récupérer toutes les quêtes disponibles
+  getQuests: async () => {
+    try {
+      const response = await axiosInstance.get('/quests');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get quests:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Services pour le mode Versus
-export const getVersusMode = async () => {
-  try {
-    const response = await API.get('/game/versus');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Démarrer une quête pour le personnage actif
+  startQuest: async (questId) => {
+    try {
+      const response = await axiosInstance.post(`/quests/${questId}/start`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to start quest ${questId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const startBattle = async (player1Id, player2Id) => {
-  try {
-    const response = await API.post('/game/fight', {
-      player1: player1Id,
-      player2: player2Id
-    });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Récupérer les quêtes complétées par un personnage
+  getCompletedQuests: async (characterId) => {
+    try {
+      const response = await axiosInstance.get(`/characters/${characterId}/completed_quests`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get completed quests for character ${characterId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Services pour les quêtes
-export const getQuests = async () => {
-  try {
-    const response = await API.get('/game/quests');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // ==================== INVENTAIRE ====================
+  
+  // Récupérer l'inventaire du personnage actif
+  getInventory: async () => {
+    try {
+      const response = await axiosInstance.get('/inventory');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get inventory:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const startQuest = async (questId) => {
-  try {
-    const response = await API.post(`/game/quest/${questId}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Ajouter un objet à l'inventaire
+  addItem: async (itemData) => {
+    try {
+      const response = await axiosInstance.post('/inventory', itemData);
+      return response.data;
+    } catch (error) {
+      console.error('Failed to add item:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Service pour le jeu de plateau
-export const getBoardGame = async () => {
-  try {
-    const response = await API.get('/game/board_game');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Mettre à jour un objet dans l'inventaire
+  updateItem: async (itemId, itemData) => {
+    try {
+      const response = await axiosInstance.put(`/inventory/${itemId}`, itemData);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to update item ${itemId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-export const playTurn = async (gameId) => {
-  try {
-    const response = await API.post(`/game/board_game/play_turn`, { game_id: gameId });
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Supprimer un objet de l'inventaire
+  deleteItem: async (itemId) => {
+    try {
+      const response = await axiosInstance.delete(`/inventory/${itemId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to delete item ${itemId}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Fonction utilitaire pour vérifier l'authentification
-export const isAuthenticated = async () => {
-  try {
-    const response = await checkAuth();
-    return response.success;
-  } catch (error) {
-    return false;
-  }
-};
-
-// Fonction pour obtenir les informations du personnage actif
-export const getCharacterInfo = async () => {
-  try {
-    const response = await API.get('/game/character_profile');
-    return response.data.character;
-  } catch (error) {
-    if (error.response && error.response.status === 404) {
-      // Aucun personnage actif
-      return null;
+  // Utiliser un objet
+  useItem: async (itemId) => {
+    try {
+      const response = await axiosInstance.post(`/inventory/${itemId}/use`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to use item ${itemId}:`, error);
+      throw error;
     }
-    if (error.response && error.response.data) {
-      return error.response.data;
+  },
+
+  // Récupérer tous les types d'objets disponibles
+  getItemTypes: async () => {
+    try {
+      const response = await axiosInstance.get('/items');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get item types:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Fonction d'enregistrement (inscription)
-export const register = async (userData) => {
-  try {
-    const response = await API.post('/register', userData);
-    return response.data;
-  } catch (error) {
-    // Capturer les erreurs de validation du backend
-    if (error.response && error.response.data) {
-      throw error.response.data;
+  // ==================== COMBATS ====================
+  
+  // Démarrer un combat entre deux personnages (PvP)
+  startVersus: async (player1Id, player2Id) => {
+    try {
+      const response = await axiosInstance.post('/versus', {
+        player1_id: player1Id,
+        player2_id: player2Id
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Failed to start versus battle:', error);
+      throw error;
     }
-    // Erreur réseau ou autre
-    throw { success: false, errors: { general: "Erreur de connexion au serveur" } };
-  }
-};
+  },
 
-
-// Cette fonction login était peut-être déjà présente
-export const login = async (email, password) => {
-  try {
-    const response = await API.post('/login', { email, password });
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return {
-        success: false,
-        errors: error.response.data
-      };
+  // ==================== JEU DE PLATEAU ====================
+  
+  // Démarrer une partie sur le plateau de jeu
+  startBoardGame: async () => {
+    try {
+      const response = await axiosInstance.post('/board_game/start');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to start board game:', error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Fonction pour récupérer les types d'objets disponibles
-export const getItemTypes = async () => {
-  try {
-    const response = await API.get('/item_types');
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // Effectuer un mouvement sur le plateau
+  makeBoardMove: async (direction) => {
+    try {
+      const response = await axiosInstance.post('/board_game/move', { direction });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to make move ${direction}:`, error);
+      throw error;
     }
-    throw error;
-  }
-};
+  },
 
-// Fonction pour récupérer les détails d'un objet spécifique
-export const getItemDetails = async (itemId) => {
-  try {
-    const response = await API.get(`/item/${itemId}`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
+  // ==================== STATISTIQUES ====================
+  
+  // Récupérer les statistiques d'un personnage
+  getCharacterStats: async (characterId) => {
+    try {
+      const response = await axiosInstance.get(`/characters/${characterId}/stats`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get statistics for character ${characterId}:`, error);
+      throw error;
     }
-    throw error;
-  }
+  },
 };
 
-// Fonction pour récupérer les détails d'une quête
-export const getQuestDetails = async (questId) => {
-  try {
-    const response = await API.get(`/game/quest/${questId}/details`);
-    return response.data;
-  } catch (error) {
-    if (error.response && error.response.data) {
-      return error.response.data;
-    }
-    throw error;
-  }
-};
-
-// Récupérer la liste des personnages de l'utilisateur
-export const getCharacters = async () => {
-  try {
-    const response = await API.get('/game/characters');
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors de la récupération des personnages:', error);
-    throw error;
-  }
-};
-
-// Démarrer un combat entre deux personnages
-export const startFight = async (player1Id, player2Id) => {
-  try {
-    const response = await API.post('/game/fight', {
-      player1: player1Id,
-      player2: player2Id
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors du démarrage du combat:', error);
-    throw error;
-  }
-};
-
-// Démarrer une partie du jeu de plateau
-export const startBoardGame = async () => {
-  try {
-    const response = await API.get('/game/board_game');
-    return response.data;
-  } catch (error) {
-    console.error('Erreur lors du démarrage du jeu de plateau:', error);
-    throw error;
-  }
-};
-
-
+export default apiService;
