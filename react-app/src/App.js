@@ -12,18 +12,19 @@ import CharactersPage from './pages/CharactersPage';
 import CharacterProfilePage from './pages/CharacterProfilePage';
 import InventoryPage from './pages/InventoryPage';
 import QuestsPage from './pages/QuestsPage';
-import VersusPage from './pages/VersusPage';
 import BoardGamePage from './pages/BoardGamePage';
 import NotFoundPage from './pages/NotFoundPage';
 import BattlePage from './pages/BattlePage';
 
 // Layout
 import Layout from './components/layout/Layout';
+import Navbar from './components/navigation/Navbar';
 
 function App() {
   return (
     <AuthProvider>
       <GameProvider>
+        <Navbar />
         <Router>
           <Routes>
             {/* Public Routes */}
@@ -37,7 +38,6 @@ function App() {
               <Route path="/characters/:id" element={<CharacterProfilePage />} />
               <Route path="/inventory" element={<InventoryPage />} />
               <Route path="/quests" element={<QuestsPage />} />
-              <Route path="/versus" element={<VersusPage />} />
               <Route path="/board-game" element={<BoardGamePage />} />
               <Route path="/battle" element={<BattlePage />} />
             </Route>
