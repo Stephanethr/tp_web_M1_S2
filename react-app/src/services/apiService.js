@@ -2,6 +2,7 @@ import axios from 'axios';
 
 // Configuration de base pour axios
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+axios.defaults.withCredentials = true; // Important pour envoyer les cookies de session
 
 // Créer une instance axios avec la configuration par défaut
 const axiosInstance = axios.create({

@@ -32,7 +32,7 @@ function InventoryPage() {
     addItem, 
     updateItem, 
     deleteItem, 
-    useItem 
+    consumeItem // Renommé de useItem à consumeItem
   } = useInventory(characterId);
 
   // Charger l'inventaire et les types d'objets lorsque le personnage change
@@ -61,7 +61,8 @@ function InventoryPage() {
   };
 
   const handleUseItem = async (itemId) => {
-    await useItem(itemId);
+    // Utilisez consumeItem au lieu de useItem
+    await consumeItem(itemId);
   };
 
   if (characterLoading || loading) {

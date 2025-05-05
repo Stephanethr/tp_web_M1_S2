@@ -103,7 +103,7 @@ const useInventory = (characterId) => {
   }, [characterId]);
 
   // Utiliser un objet (pour les potions, etc.)
-  const useItem = useCallback(async (itemId) => {
+  const consumeItem = useCallback(async (itemId) => {
     if (!characterId) return false;
     
     setLoading(true);
@@ -131,7 +131,7 @@ const useInventory = (characterId) => {
     addItem,
     updateItem,
     deleteItem,
-    useItem,
+    consumeItem,
   };
 };
 
