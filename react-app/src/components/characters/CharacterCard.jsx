@@ -6,7 +6,7 @@ import characterService from '../../services/characterService';
 const CharacterCard = ({ character, isActive, onSelect, refreshList }) => {
   const handleSelectCharacter = async () => {
     try {
-      await characterService.selectCharacter(character.id);
+      await characterService.setActiveCharacter(character.id);
       onSelect(character.id);
       refreshList();
     } catch (error) {

@@ -33,11 +33,12 @@ const characterService = {
   },
 
   // Sélectionner un personnage actif
-  selectCharacter: async (id) => {
+  setActiveCharacter: async (characterId) => {
     try {
-      const response = await api.post(`/api/characters/${id}/select`);
+      const response = await api.post(`/api/characters/${characterId}/active`);
       return response.data;
     } catch (error) {
+      console.error('API Error:', error);
       throw error;
     }
   },
@@ -48,6 +49,16 @@ const characterService = {
       const response = await api.get(`/api/characters/${id}/stats`);
       return response.data;
     } catch (error) {
+      throw error;
+    }
+  },
+
+  getRaces: async () => {
+    try {
+      const response = await api.get('/api/races');
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
       throw error;
     }
   }
