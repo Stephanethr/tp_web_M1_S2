@@ -15,6 +15,7 @@ import QuestsPage from './pages/QuestsPage';
 import VersusPage from './pages/VersusPage';
 import BoardGamePage from './pages/BoardGamePage';
 import NotFoundPage from './pages/NotFoundPage';
+import BattlePage from './pages/BattlePage';
 
 // Layout
 import Layout from './components/layout/Layout';
@@ -38,6 +39,7 @@ function App() {
               <Route path="/quests" element={<QuestsPage />} />
               <Route path="/versus" element={<VersusPage />} />
               <Route path="/board-game" element={<BoardGamePage />} />
+              <Route path="/battle" element={<BattlePage />} />
             </Route>
             
             {/* 404 Route */}

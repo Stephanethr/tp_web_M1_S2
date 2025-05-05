@@ -172,63 +172,69 @@ const apiService = {
   // Récupérer tous les objets de l'inventaire d'un personnage
   getInventoryItems: async (characterId) => {
     try {
-      const response = await api.get(`/inventory?character_id=${characterId}`);
+      const response = await axiosInstance.get(`/inventory?character_id=${characterId}`);
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error(`Failed to get inventory items for character ${characterId}:`, error);
+      throw error;
     }
   },
 
   // Récupérer les types d'objets disponibles
   getItemTypes: async () => {
     try {
-      const response = await api.get('/item_types');
+      const response = await axiosInstance.get('/item_types');
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error('Failed to get item types:', error);
+      throw error;
     }
   },
 
   // Ajouter un nouvel objet à l'inventaire
   addInventoryItem: async (characterId, itemData) => {
     try {
-      const response = await api.post('/add_item', {
+      const response = await axiosInstance.post('/add_item', {
         character_id: characterId,
         ...itemData
       });
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error('Failed to add inventory item:', error);
+      throw error;
     }
   },
 
   // Mettre à jour un objet existant
   updateInventoryItem: async (itemId, itemData) => {
     try {
-      const response = await api.put(`/edit/${itemId}`, itemData);
+      const response = await axiosInstance.put(`/edit/${itemId}`, itemData);
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error(`Failed to update inventory item ${itemId}:`, error);
+      throw error;
     }
   },
 
   // Supprimer un objet de l'inventaire
   deleteInventoryItem: async (itemId) => {
     try {
-      const response = await api.delete(`/delete/${itemId}`);
+      const response = await axiosInstance.delete(`/delete/${itemId}`);
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error(`Failed to delete inventory item ${itemId}:`, error);
+      throw error;
     }
   },
 
   // Utiliser un objet consommable
   consumeInventoryItem: async (itemId) => {
     try {
-      const response = await api.post(`/consume/${itemId}`);
+      const response = await axiosInstance.post(`/consume/${itemId}`);
       return response.data;
     } catch (error) {
-      handleApiError(error);
+      console.error(`Failed to consume inventory item ${itemId}:`, error);
+      throw error;
     }
   },
 
