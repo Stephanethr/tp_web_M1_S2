@@ -1,13 +1,21 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import CharacterList from '../components/character/CharacterList';
+import { Helmet } from 'react-helmet';
+import CharacterList from '../components/characters/CharacterList';
 
-function CharactersPage() {
+const CharactersPage = () => {
   return (
-    <div className="bg-gray-50 min-h-screen py-8">
-      <CharacterList />
+    <div className="container mx-auto px-4 py-8">
+      <Helmet>
+        <title>Mes Personnages | RPG Game</title>
+      </Helmet>
+      
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white shadow-sm rounded-lg p-6">
+          <CharacterList />
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default CharactersPage;

@@ -1,127 +1,99 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
-import useCharacter from '../hooks/useCharacter';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import Loading from '../components/common/Loading';
+import { useAuth } from '../contexts/AuthContext';
 
-function HomePage() {
+const HomePage = () => {
   const { currentUser } = useAuth();
-  const { activeCharacter, characters, loading, getCharacters } = useCharacter();
-
-  useEffect(() => {
-    getCharacters();
-  }, [getCharacters]);
-
-  if (loading) return <Loading />;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="text-center mb-10">
-        <h1 className="text-4xl font-bold mb-4">Welcome to RPG Game</h1>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Bienvenue dans notre univers RPG</h1>
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          Embark on an epic adventure, create powerful characters, battle fearsome monsters,
-          and collect legendary treasures!
+          Plongez dans un monde de fantasy, créez votre héros et partez à l'aventure !
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        {/* Character Section */}
-        <Card>
-          <div className="flex flex-col items-center">
-            <div className="bg-indigo-100 p-4 rounded-full mb-4">
-              <svg className="h-10 w-10 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">Characters</h2>
-            <p className="text-gray-600 text-center mb-4">
-              {characters.length > 0
-                ? `You have ${characters.length} character${characters.length > 1 ? 's' : ''}`
-                : "You don't have any characters yet"}
-            </p>
-            <Link to="/characters" className="w-full">
-              <Button fullWidth variant="primary">
-                {characters.length > 0 ? "View Characters" : "Create Character"}
-              </Button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-primary-700 mb-4">Choisissez votre classe</h2>
+          <h2 className="text-2xl font-bold text-primary-700 mb-4">Choisissez votre classe</h2>
+          <p className="text-gray-600 mb-4">Guerrier courageux ou mage puissant ? Choisissez votre voie et développez vos compétences uniques.</p>
+          {currentUser ? (
+            <Link to="/characters" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Créer un personnage
             </Link>
-          </div>
-        </Card>
-
-        {/* Quests Section */}
-        <Card>
-          <div className="flex flex-col items-center">
-            <div className="bg-green-100 p-4 rounded-full mb-4">
-              <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">Quests</h2>
-            <p className="text-gray-600 text-center mb-4">
-              {activeCharacter 
-                ? "Embark on adventures and earn rewards" 
-                : "Select a character to start questing"}
-            </p>
-            <Link to="/quests" className="w-full">
-              <Button 
-                fullWidth 
-                variant="primary" 
-                disabled={!activeCharacter}
-              >
-                View Quests
-              </Button>
+          ) : (
+            <Link to="/login" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Se connecter
             </Link>
-          </div>
-        </Card>
-
-        {/* Battle Section */}
-        <Card>
-          <div className="flex flex-col items-center">
-            <div className="bg-red-100 p-4 rounded-full mb-4">
-              <svg className="h-10 w-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold mb-2">Battle Arena</h2>
-            <p className="text-gray-600 text-center mb-4">
-              {characters.length > 1 
-                ? "Pit your characters against each other" 
-                : "Create at least 2 characters to battle"
-              }
-            </p>
-            <Link to="/versus" className="w-full">
-              <Button 
-                fullWidth 
-                variant="primary" 
-                disabled={characters.length < 2}
-              >
-                Enter Arena
-              </Button>
+          )}
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-primary-700 mb-4">Explorez des quêtes</h2>
+          <p className="text-gray-600 mb-4">Partez à l'aventure, combattez des monstres et accomplissez des quêtes épiques à travers les terres mythiques.</p>
+          {currentUser ? (
+            <Link to="/quests" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Voir les quêtes
             </Link>
-          </div>
-        </Card>
-      </div>
-
-      {/* Board Game Section */}
-      <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg p-6 shadow-lg">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="mb-4 md:mb-0 md:mr-6">
-            <h2 className="text-2xl font-bold mb-2">Board Game Adventure</h2>
-            <p className="max-w-xl">
-              A unique tabletop-inspired experience. Navigate your character through a series of challenges, 
-              battle monsters, and collect treasures to complete the journey!
-            </p>
-          </div>
-          <Link to="/board-game">
-            <Button variant="light">
-              Play Now
-            </Button>
-          </Link>
+          ) : (
+            <Link to="/register" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              S'inscrire
+            </Link>
+          )}
+        </div>
+        
+        <div className="bg-white p-6 rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-primary-700 mb-4">Collectionnez des objets</h2>
+          <p className="text-gray-600 mb-4">Trouvez des équipements rares, des potions magiques et des ressources précieuses pour améliorer votre personnage.</p>
+          {currentUser ? (
+            <Link to="/inventory" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Voir l'inventaire
+            </Link>
+          ) : (
+            <Link to="/about" className="inline-block mt-2 px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              En savoir plus
+            </Link>
+          )}
         </div>
       </div>
+      
+      {currentUser ? (
+        <div className="bg-primary-50 p-6 rounded-lg shadow border border-primary-200">
+          <h2 className="text-2xl font-bold text-primary-800 mb-4">Bienvenue, {currentUser.user_login}!</h2>
+          <p className="text-gray-700 mb-4">
+            Votre aventure vous attend. Que souhaitez-vous faire aujourd'hui?
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/characters" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Mes personnages
+            </Link>
+            <Link to="/quests" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Quêtes disponibles
+            </Link>
+            <Link to="/inventory" className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700">
+              Mon inventaire
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gray-100 p-6 rounded-lg shadow text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Rejoignez l'aventure</h2>
+          <p className="text-gray-600 mb-6">Créez un compte gratuitement et commencez votre quête dès aujourd'hui !</p>
+          <div className="space-x-4">
+            <Link to="/login" className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 shadow-md">
+              Se connecter
+            </Link>
+            <Link to="/register" className="px-6 py-3 bg-white text-primary-700 border border-primary-600 rounded-lg hover:bg-gray-50 shadow-md">
+              S'inscrire
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default HomePage;
+
