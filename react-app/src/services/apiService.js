@@ -167,69 +167,68 @@ const apiService = {
 
   // ==================== INVENTAIRE ====================
   
-  // Récupérer l'inventaire du personnage actif
-  getInventory: async () => {
+// Dans services/apiService.js, ajoutez ou complétez ces fonctions :
+
+  // Récupérer tous les objets de l'inventaire d'un personnage
+  getInventoryItems: async (characterId) => {
     try {
-      const response = await axiosInstance.get('/inventory');
+      const response = await api.get(`/inventory?character_id=${characterId}`);
       return response.data;
     } catch (error) {
-      console.error('Failed to get inventory:', error);
-      throw error;
+      handleApiError(error);
     }
   },
 
-  // Ajouter un objet à l'inventaire
-  addItem: async (itemData) => {
+  // Récupérer les types d'objets disponibles
+  getItemTypes: async () => {
     try {
-      const response = await axiosInstance.post('/inventory', itemData);
+      const response = await api.get('/item_types');
       return response.data;
     } catch (error) {
-      console.error('Failed to add item:', error);
-      throw error;
+      handleApiError(error);
     }
   },
 
-  // Mettre à jour un objet dans l'inventaire
-  updateItem: async (itemId, itemData) => {
+  // Ajouter un nouvel objet à l'inventaire
+  addInventoryItem: async (characterId, itemData) => {
     try {
-      const response = await axiosInstance.put(`/inventory/${itemId}`, itemData);
+      const response = await api.post('/add_item', {
+        character_id: characterId,
+        ...itemData
+      });
       return response.data;
     } catch (error) {
-      console.error(`Failed to update item ${itemId}:`, error);
-      throw error;
+      handleApiError(error);
+    }
+  },
+
+  // Mettre à jour un objet existant
+  updateInventoryItem: async (itemId, itemData) => {
+    try {
+      const response = await api.put(`/edit/${itemId}`, itemData);
+      return response.data;
+    } catch (error) {
+      handleApiError(error);
     }
   },
 
   // Supprimer un objet de l'inventaire
-  deleteItem: async (itemId) => {
+  deleteInventoryItem: async (itemId) => {
     try {
-      const response = await axiosInstance.delete(`/inventory/${itemId}`);
+      const response = await api.delete(`/delete/${itemId}`);
       return response.data;
     } catch (error) {
-      console.error(`Failed to delete item ${itemId}:`, error);
-      throw error;
+      handleApiError(error);
     }
   },
 
-  // Utiliser un objet
-  useItem: async (itemId) => {
+  // Utiliser un objet consommable
+  consumeInventoryItem: async (itemId) => {
     try {
-      const response = await axiosInstance.post(`/inventory/${itemId}/use`);
+      const response = await api.post(`/consume/${itemId}`);
       return response.data;
     } catch (error) {
-      console.error(`Failed to use item ${itemId}:`, error);
-      throw error;
-    }
-  },
-
-  // Récupérer tous les types d'objets disponibles
-  getItemTypes: async () => {
-    try {
-      const response = await axiosInstance.get('/items');
-      return response.data;
-    } catch (error) {
-      console.error('Failed to get item types:', error);
-      throw error;
+      handleApiError(error);
     }
   },
 
