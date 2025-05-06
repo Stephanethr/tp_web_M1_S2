@@ -11,6 +11,8 @@ import CharactersPage from './pages/CharactersPage';
 import CreateCharacterPage from './pages/CreateCharacterPage';
 import CharacterDetailPage from './pages/CharacterDetailPage';
 import InventoryPage from './pages/InventoryPage';
+import QuestsPage from './pages/QuestPage';
+import QuestDetailsPage from './components/quests/QuestDetailsPage';
 
 
 
@@ -90,7 +92,17 @@ function App() {
                 </ProtectedRoute>
               } />
 
+              <Route path="/quests" element={
+                <ProtectedRoute>
+                  <QuestsPage />
+                </ProtectedRoute>
+              } />
 
+              <Route path="/quests/:questId" element={
+                <ProtectedRoute>
+                  <QuestDetailsPage />
+                </ProtectedRoute>
+              } />
               
               {/* Routes protégées - à ajouter dans le futur */}
               {/* 
