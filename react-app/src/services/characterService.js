@@ -46,7 +46,7 @@ const characterService = {
   // Récupérer les statistiques d'un personnage
   getCharacterStats: async (id) => {
     try {
-      const response = await api.get(`/api/characters/${id}/stats`);
+      const response = await api.get(`/api/characters/${id}`);
       return response.data;
     } catch (error) {
       throw error;

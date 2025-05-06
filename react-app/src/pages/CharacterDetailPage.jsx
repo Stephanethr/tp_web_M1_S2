@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import { ChevronLeftIcon } from '@heroicons/react/24/solid';
 import { useAuth } from '../contexts/AuthContext';
 import characterService from '../services/characterService';
-import CharacterStats from '../components/characters/CharacterStats';
+import CharacterStats from '../components/characters/CharacterDetail';
 
 const CharacterDetailPage = () => {
   const { id } = useParams();
@@ -116,7 +116,7 @@ const CharacterDetailPage = () => {
             </span>
           </h1>
           <p className="text-primary-100 text-sm">
-            {character.race.name} • {character.class.name}
+            {character.race.name} • {character.class}
           </p>
         </div>
 
@@ -126,13 +126,13 @@ const CharacterDetailPage = () => {
             <div className="lg:col-span-1">
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <img 
-                  src={character.avatar_url || `/images/${character.class.name.toLowerCase()}.png`} 
+                  src={character.avatar_url || `/images/${character.class.toLowerCase()}.png`} 
                   alt={character.name}
                   className="w-32 h-32 mx-auto rounded-full object-cover border-4 border-primary-500"
                 />
 
                 <h2 className="text-lg font-semibold text-gray-900 mt-4">{character.name}</h2>
-                <p className="text-gray-600 text-sm">{character.race.name} {character.class.name}</p>
+                <p className="text-gray-600 text-sm">{character.race.name} {character.class}</p>
                 <p className="text-gray-500 text-sm mt-1">Niveau {character.level}</p>
 
                 <div className="mt-4 space-y-2">
