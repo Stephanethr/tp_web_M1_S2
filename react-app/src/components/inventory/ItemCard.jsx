@@ -7,28 +7,28 @@ import {
   LockOpenIcon
 } from '@heroicons/react/24/outline';
 
-// Types d'objets et leurs icônes/couleurs correspondantes
+// Mappage des types d'objets à leurs styles
 const ITEM_STYLES = {
-  weapon: {
+  1: { // Armes
     icon: '⚔️',
     bgColor: 'bg-red-100',
     textColor: 'text-red-800',
     borderColor: 'border-red-200'
   },
-  armor: {
+  2: { // Armures
     icon: '🛡️',
     bgColor: 'bg-blue-100',
     textColor: 'text-blue-800',
     borderColor: 'border-blue-200'
   },
-  potion: {
+  3: { // Potions
     icon: '🧪',
     bgColor: 'bg-purple-100',
     textColor: 'text-purple-800',
     borderColor: 'border-purple-200'
   },
-  accessory: {
-    icon: '💍',
+  4: { // Matériaux
+    icon: '📦',
     bgColor: 'bg-yellow-100',
     textColor: 'text-yellow-800',
     borderColor: 'border-yellow-200'
@@ -42,13 +42,12 @@ const ITEM_STYLES = {
   }
 };
 
-const getItemStyle = (type) => {
-  const typeLower = type.toLowerCase();
-  return ITEM_STYLES[typeLower] || ITEM_STYLES.default;
+const getItemStyle = (typeId) => {
+  return ITEM_STYLES[typeId] || ITEM_STYLES.default;
 };
 
 const ItemCard = ({ item, onEdit, onDelete, onUse, equipped, onToggleEquip }) => {
-  const itemStyle = getItemStyle(item.type);
+  const itemStyle = getItemStyle(item.type_id);
 
   return (
     <div className={`relative border ${itemStyle.borderColor} rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow`}>
@@ -91,9 +90,9 @@ const ItemCard = ({ item, onEdit, onDelete, onUse, equipped, onToggleEquip }) =>
               </button>
             )}
             
-            {(item.type === 'weapon' || item.type === 'armor' || item.type === 'accessory') && (
+            {item.can_be_equipped && (
               <button 
-                onClick={() => onToggleEquip(item.id, item.type, !equipped)}
+                onClick={() => onToggleEquip(item.id)}
                 className={`inline-flex items-center px-2 py-1 border border-transparent text-xs font-medium rounded ${
                   equipped
                     ? 'text-orange-700 bg-orange-100 hover:bg-orange-200'

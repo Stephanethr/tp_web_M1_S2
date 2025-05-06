@@ -11,7 +11,6 @@ const InventoryList = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
-  const [equipped, setEquipped] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [characterName, setCharacterName] = useState('');
@@ -24,25 +23,56 @@ const InventoryList = () => {
     sort: 'name_asc'
   });
 
+  // Filtrage des objets côté client
+  const filteredItems = () => {
+    let filtered = [...items];
+
+    // Filtrage par recherche (nom)
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(item => 
+        item.name.toLowerCase().includes(searchLower) || 
+        (item.description && item.description.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Filtrage par type
+    if (filters.type) {
+      filtered = filtered.filter(item => item.type_id === parseInt(filters.type));
+    }
+
+    // Tri
+    const [sortField, sortOrder] = filters.sort ? filters.sort.split('_') : ['name', 'asc'];
+    filtered.sort((a, b) => {
+      let compareA, compareB;
+
+      if (sortField === 'name') {
+        compareA = a.name.toLowerCase();
+        compareB = b.name.toLowerCase();
+      } else if (sortField === 'quantity') {
+        compareA = a.quantity;
+        compareB = b.quantity;
+      } else if (sortField === 'type') {
+        compareA = a.type_name?.toLowerCase() || '';
+        compareB = b.type_name?.toLowerCase() || '';
+      }
+
+      if (compareA < compareB) return sortOrder === 'asc' ? -1 : 1;
+      if (compareA > compareB) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  };
+
   // Récupérer les données de l'inventaire
   const fetchInventory = async () => {
     setLoading(true);
     try {
-      const sortParam = filters.sort ? filters.sort.split('_') : ['name', 'asc'];
-      const response = await inventoryService.getInventory({
-        sort_by: sortParam[0],
-        order: sortParam[1],
-        search: filters.search,
-        type: filters.type
-      });
+      const response = await inventoryService.getInventory();
 
       if (response.success) {
         setItems(response.items || []);
-        setCharacterName(response.character_name || '');
-        
-        // Récupérer les objets équipés depuis les données
-        const equippedIds = (response.equipped || []).map(item => item.inventory_id);
-        setEquipped(equippedIds);
       } else {
         throw new Error(response.message || "Erreur lors du chargement de l'inventaire");
       }
@@ -65,10 +95,10 @@ const InventoryList = () => {
     }
   };
 
-  // Charger l'inventaire au chargement du composant et quand les filtres changent
+  // Charger l'inventaire au chargement du composant
   useEffect(() => {
     fetchInventory();
-  }, [filters, navigate]);
+  }, [navigate]);
 
   // Ouvrir le modal pour ajouter/modifier un item
   const handleOpenModal = (item = null) => {
@@ -125,16 +155,11 @@ const InventoryList = () => {
     }
   };
 
-  // Gérer l'équipement/déséquipement d'un item
-  const handleToggleEquip = async (itemId, itemType, equip) => {
+  // Gérer l'équipement/déséquipement d'un item (maintenant le fait avec useItem)
+  const handleToggleEquip = async (itemId) => {
     try {
-      if (equip) {
-        // Équiper l'objet
-        await inventoryService.equipItem(itemId, itemType);
-      } else {
-        // Déséquiper l'objet
-        await inventoryService.unequipItem(itemId);
-      }
+      const response = await inventoryService.useItem(itemId);
+      alert(response.effect || "Statut d'équipement modifié.");
       fetchInventory(); // Rafraîchir les données
     } catch (error) {
       console.error("Erreur lors de l'équipement/déséquipement de l'objet:", error);
@@ -143,7 +168,7 @@ const InventoryList = () => {
   };
 
   // S'il n'y a pas de personnage actif
-  if (error && error.includes('sélectionner un personnage')) {
+  if (error && error.includes('Aucun personnage actif sélectionné')) {
     return (
       <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
         <div className="flex">
@@ -152,7 +177,7 @@ const InventoryList = () => {
           </div>
           <div className="ml-3">
             <p className="text-sm text-yellow-700">
-              Vous devez d'abord sélectionner un personnage pour accéder à l'inventaire.
+              Vous devez d'abord sélectionner un personnage actif pour accéder à l'inventaire.
             </p>
             <div className="mt-4">
               <button
@@ -168,16 +193,20 @@ const InventoryList = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-700"></div>
-      </div>
-    );
-  }
-
   return (
-    <div>
+    <div className="container mx-auto py-8 px-4">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Inventaire</h1>
+        <button
+          onClick={() => handleOpenModal()}
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          <PlusIcon className="h-5 w-5 mr-2" />
+          Ajouter un objet
+        </button>
+      </div>
+
+      {/* Message d'erreur */}
       {error && (
         <div className="bg-red-50 border-l-4 border-red-400 p-4 mb-4">
           <div className="flex">
@@ -191,25 +220,6 @@ const InventoryList = () => {
         </div>
       )}
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
-          Inventaire de {characterName}
-        </h1>
-        <p className="text-gray-600 mt-1">
-          Gérez les objets que votre personnage a collectés au cours de ses aventures.
-        </p>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <button
-          onClick={() => handleOpenModal()}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-        >
-          <PlusIcon className="h-5 w-5 mr-1" />
-          Ajouter un objet
-        </button>
-      </div>
-
       {/* Filtres */}
       <ItemFilter
         filters={filters}
@@ -218,17 +228,26 @@ const InventoryList = () => {
       />
 
       {/* Liste des objets */}
-      {items.length === 0 ? (
-        <div className="bg-white p-6 rounded-lg shadow text-center">
-          <p className="text-gray-500">Votre inventaire est vide. Ajoutez des objets ou partez à l'aventure pour en obtenir !</p>
+      {loading ? (
+        <div className="flex justify-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {items.map(item => (
+      ) : filteredItems().length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredItems().map(item => (
             <ItemCard
               key={item.id}
-              item={item}
-              equipped={equipped.includes(item.id)}
+              item={{
+                id: item.id,
+                name: item.name,
+                type: item.type_name,
+                type_id: item.type_id,
+                quantity: item.quantity,
+                description: item.description,
+                can_be_consumed: item.type_id === 3, // Potions sont consommables
+                can_be_equipped: item.type_id === 1 || item.type_id === 2 // Armes et armures
+              }}
+              equipped={item.is_equipped}
               onEdit={handleOpenModal}
               onDelete={handleDeleteItem}
               onUse={handleUseItem}
@@ -236,16 +255,29 @@ const InventoryList = () => {
             />
           ))}
         </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow p-8 text-center">
+          <p className="text-gray-500">Aucun objet trouvé dans votre inventaire.</p>
+          <button 
+            onClick={() => handleOpenModal()}
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Ajouter votre premier objet
+          </button>
+        </div>
       )}
 
-      {/* Modal pour ajouter/modifier des objets */}
-      <ItemModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        item={selectedItem}
-        itemTypes={itemTypes}
-        onSave={handleSaveItem}
-      />
+      {/* Modal d'ajout/édition d'objet */}
+      {isModalOpen && (
+        <ItemModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSave={handleSaveItem}
+          item={selectedItem}
+          itemTypes={itemTypes}
+        />
+      )}
     </div>
   );
 };

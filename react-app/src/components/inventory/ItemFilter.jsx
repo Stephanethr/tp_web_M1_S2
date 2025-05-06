@@ -43,7 +43,7 @@ const ItemFilter = ({ filters, onFilterChange, itemTypes }) => {
             <option value="">Tous les types</option>
             {itemTypes.map(type => (
               <option key={type.id} value={type.id}>
-                {type.name}
+                {type.type_name}
               </option>
             ))}
           </select>

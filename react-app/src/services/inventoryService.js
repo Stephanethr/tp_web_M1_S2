@@ -1,86 +1,59 @@
 import api from './api';
 
-const inventoryService = {
-  // Récupérer l'inventaire du personnage actif
-  getInventory: async (params = {}) => {
+export const inventoryService = {
+  getInventory: async () => {
     try {
-      const response = await api.get('/inventory/', { params });
+      const response = await api.get('/inv/api/inventory');
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de la récupération de l'inventaire" };
     }
   },
-
-  // Ajouter un nouvel item à l'inventaire
+  
   addItem: async (itemData) => {
     try {
-      const response = await api.post('/inventory/', itemData);
+      const response = await api.post('/inv/api/inventory', itemData);
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de l'ajout de l'objet" };
     }
   },
-
-  // Mettre à jour un item existant
+  
   updateItem: async (id, itemData) => {
     try {
-      const response = await api.put(`/inventory/${id}`, itemData);
+      const response = await api.put(`/inv/api/inventory/${id}`, itemData);
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de la modification de l'objet" };
     }
   },
-
-  // Supprimer un item de l'inventaire
+  
   deleteItem: async (id) => {
     try {
-      const response = await api.delete(`/inventory/${id}`);
+      const response = await api.delete(`/inv/api/inventory/${id}`);
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de la suppression de l'objet" };
     }
   },
-
-  // Utiliser un item (consommer)
+  
   useItem: async (id) => {
     try {
-      const response = await api.post(`/inventory/${id}/use`);
+      const response = await api.post(`/inv/api/inventory/${id}/use`);
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de l'utilisation de l'objet" };
     }
   },
-
-  // Récupérer les types d'objets disponibles
+  
   getItemTypes: async () => {
     try {
-      const response = await api.get('/items');
+      const response = await api.get('/inv/api/items');
       return response.data;
     } catch (error) {
-      throw error;
+      throw error.response?.data || { success: false, message: "Une erreur est survenue lors de la récupération des types d'objets" };
     }
   },
-
-  // Équiper un objet
-  equipItem: async (itemId, slot) => {
-    try {
-      const response = await api.post(`/api/inventory/${itemId}/equip`, { slot });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
-  // Déséquiper un objet
-  unequipItem: async (itemId) => {
-    try {
-      const response = await api.post(`/api/inventory/${itemId}/unequip`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
-
 };
 
 export default inventoryService;
