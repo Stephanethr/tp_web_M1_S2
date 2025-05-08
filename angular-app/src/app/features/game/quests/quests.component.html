@@ -1,108 +1,124 @@
 <div class="quests-container">
-    <h2>Quests</h2>
+  <div class="quests-header">
+    <h2>Quêtes disponibles</h2>
+    <a routerLink="/characters" class="btn btn-outline-secondary">Retour aux personnages</a>
+  </div>
   
-    <div *ngIf="loading" class="text-center">
-      <div class="spinner-border"></div>
-      <p>Loading quest...</p>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
     </div>
+  </div>
   
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
+  <div *ngIf="!character && !loading" class="no-character">
+    <p>Vous devez d'abord sélectionner un personnage pour accéder aux quêtes.</p>
+    <a routerLink="/characters" class="btn btn-primary">Sélectionner un personnage</a>
+  </div>
+  
+  <div *ngIf="character && !loading && !questResult" class="quests-list">
+    <div class="character-info">
+      <h3>{{ character.name }}</h3>
+      <div class="character-stats">
+        <div class="stat">
+          <span class="stat-name">Santé:</span>
+          <span class="stat-value">{{ character.health }}/100</span>
+        </div>
+        <div class="stat">
+          <span class="stat-name">Attaque:</span>
+          <span class="stat-value">{{ character.attack }}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-name">Défense:</span>
+          <span class="stat-value">{{ character.defense }}</span>
+        </div>
+      </div>
     </div>
-  
-    <div *ngIf="!showResult">
-      <div class="quests-list">
-        <div *ngFor="let quest of quests" class="quest-card" [class.selected]="selectedQuest === quest">
+    
+    <div class="quests-grid">
+      <div *ngFor="let quest of quests" class="quest-card">
+        <div class="quest-card-header">
           <h3>{{ quest.name }}</h3>
-          <p class="quest-description">{{ quest.description }}</p>
-          
-          <div class="quest-details">
-            <div class="detail">
-              <span class="detail-label">Difficulty:</span>
-              <span [ngClass]="getDifficultyClass(quest.difficulty)">{{ quest.difficulty }}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Enemy Level:</span>
-              <span>{{ quest.enemyLevel }}</span>
-            </div>
-            <div class="detail">
-              <span class="detail-label">Reward:</span>
-              <span>{{ quest.reward }}</span>
-            </div>
-          </div>
-          
-          <button 
-            (click)="startQuest(quest)" 
-            class="btn btn-primary" 
-            [disabled]="loading">
-            Start Quest
-          </button>
+          <span class="quest-difficulty" [ngClass]="'difficulty-' + quest.difficulty.toLowerCase()">
+            {{ quest.difficulty }}
+          </span>
+        </div>
+        
+        <div class="quest-card-body">
+          <p>Monstre: {{ quest.monster }}</p>
+          <p>Récompense: {{ quest.reward }}</p>
+        </div>
+        
+        <div class="quest-card-footer">
+          <button class="btn btn-primary" (click)="startQuest(quest.id)">Démarrer la quête</button>
         </div>
       </div>
     </div>
+  </div>
   
-    <div *ngIf="showResult && fightResult" class="fight-result">
-      <h3>Quest Result: {{ selectedQuest.name }}</h3>
-      
-      <div class="result-header" [ngClass]="fightResult.winner === fightResult.hero?.name ? 'victory' : 'defeat'">
-        <div class="result-title">
-          {{ fightResult.winner === fightResult.hero?.name ? 'Victory!' : 'Defeat!' }}
-        </div>
-      </div>
-      
-      <div class="combatants">
-        <div class="hero-info">
-          <h4>{{ fightResult.hero?.name }}</h4>
-          <div class="health-display">
-            <div class="health-bar">
-              <div class="health-fill hero" 
-                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].heroHealth / fightResult.hero?.originalHealth) * 100">
-              </div>
-            </div>
-            <span class="health-text">
-              {{ fightResult.rounds[fightResult.rounds.length-1].heroHealth }} / {{ fightResult.hero?.originalHealth }}
-            </span>
+  <div *ngIf="questResult" class="quest-result">
+    <h3>Résultat de la quête</h3>
+    
+    <div class="battle-summary">
+      <div class="battle-participants">
+        <div class="hero">
+          <h4>{{ questResult.hero.name }}</h4>
+          <div class="health-bar">
+            <div class="health-progress" [style.width.%]="(questResult.hero.original_health / 100) * 100"></div>
           </div>
         </div>
         
-        <div class="vs">VS</div>
+        <div class="versus">VS</div>
         
-        <div class="enemy-info">
-          <h4>{{ fightResult.monster?.name }}</h4>
-          <div class="health-display">
-            <div class="health-bar">
-              <div class="health-fill enemy" 
-                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].monsterHealth / fightResult.monster?.originalHealth) * 100">
-              </div>
-            </div>
-            <span class="health-text">
-              {{ fightResult.rounds[fightResult.rounds.length-1].monsterHealth }} / {{ fightResult.monster?.originalHealth }}
-            </span>
+        <div class="monster">
+          <h4>{{ questResult.monster.name }}</h4>
+          <div class="health-bar">
+            <div class="health-progress" [style.width.%]="(questResult.monster.original_health / 100) * 100"></div>
           </div>
         </div>
       </div>
       
       <div class="battle-rounds">
-        <h4>Battle Log</h4>
-        <div class="rounds-container">
-          <div *ngFor="let round of fightResult.rounds" class="round">
-            <div class="round-header">Round {{ round.round }}</div>
-            <div *ngIf="round.damageToHero" class="damage enemy-damage">
-              {{ fightResult.monster?.name }} deals {{ round.damageToHero }} damage to {{ fightResult.hero?.name }}
+        <div *ngFor="let round of questResult.rounds" class="battle-round">
+          <h5>Tour {{ round.round }}</h5>
+          <div class="round-details">
+            <div class="hero-health">Santé du héros: {{ round.hero_health }}</div>
+            <div class="monster-health">Santé du monstre: {{ round.monster_health }}</div>
+            
+            <div *ngIf="round.damage_to_monster" class="damage-dealt">
+              {{ questResult.hero.name }} inflige {{ round.damage_to_monster }} points de dégâts à {{ questResult.monster.name }}
             </div>
-            <div *ngIf="round.damageToMonster" class="damage hero-damage">
-              {{ fightResult.hero?.name }} deals {{ round.damageToMonster }} damage to {{ fightResult.monster?.name }}
+            
+            <div *ngIf="round.damage_to_hero" class="damage-taken">
+              {{ questResult.monster.name }} inflige {{ round.damage_to_hero }} points de dégâts à {{ questResult.hero.name }}
             </div>
+            
             <div *ngIf="round.winner" class="round-winner">
-              {{ round.winner }} wins the battle!
+              {{ round.winner }} remporte ce tour!
             </div>
           </div>
         </div>
       </div>
       
-      <div class="result-actions">
-        <button (click)="resetQuest()" class="btn btn-primary">Back to Quests</button>
-        <a routerLink="/character/profile" class="btn btn-secondary">Character Profile</a>
+      <div class="battle-result">
+        <h4>Résultat final</h4>
+        <div class="winner">{{ questResult.winner }} a gagné le combat!</div>
       </div>
     </div>
+    
+    <div class="quest-actions">
+      <button class="btn btn-primary" (click)="questResult = null">Nouvelle quête</button>
+      <a routerLink="/characters" class="btn btn-secondary">Retour aux personnages</a>
+    </div>
   </div>
+</div>
+<div *ngIf="errorMessage" class="alert alert-danger">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="successMessage" class="alert alert-success">
+  {{ successMessage }}
+</div>

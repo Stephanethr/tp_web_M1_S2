@@ -1,73 +1,64 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
-import { first } from 'rxjs/operators';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['./login.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule]
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
-  loginForm!: FormGroup;
-  loading = false;
-  submitted = false;
-  error = '';
-  returnUrl: string = '/';
+export class LoginComponent {
+  loginForm: FormGroup;
+  errorMessage: string = '';
+  successMessage: string = '';
+  loading: boolean = false;
 
-  private formBuilder = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private authService = inject(AuthService);
-  private destroyRef = inject(DestroyRef);
-
-  constructor() { 
-    // Redirect if already logged in
-    if (this.authService.currentUserValue) {
-      this.router.navigate(['/']);
-    }
-  }
-
-  ngOnInit() {
-    this.loginForm = this.formBuilder.group({
+  constructor(
+    private fb: FormBuilder, 
+    private authService: AuthService,
+    private router: Router
+  ) {
+    this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
-
-    // Get return url from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
-  // Convenience getter for easy access to form fields
-  get f() { return this.loginForm.controls; }
-
-  onSubmit() {
-    this.submitted = true;
-
-    // Stop here if form is invalid
+  onSubmit(): void {
     if (this.loginForm.invalid) {
       return;
     }
 
     this.loading = true;
-    this.authService.login(this.f['email'].value, this.f['password'].value)
-      .pipe(
-        first(),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
-        next: (data) => {
-          this.router.navigate([this.returnUrl]);
-        },
-        error: (error) => {
-          this.error = error?.error?.message || 'Login failed';
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    const email = this.loginForm.value.email;
+    const password = this.loginForm.value.password;
+
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        if (response && response.token) {
+          this.successMessage = 'Connexion réussie. Redirection...';
+          
+          // Redirection après un petit délai pour montrer le message de succès
+          setTimeout(() => {
+            this.router.navigate(['/characters']);
+          }, 1000);
+        } else {
+          this.errorMessage = response.message || 'Erreur de connexion';
           this.loading = false;
         }
-      });
+      },
+      error: (error) => {
+        console.error('Erreur de connexion:', error);
+        this.errorMessage = error.error?.message || 'Email ou mot de passe incorrect !';
+        this.loading = false;
+      }
+    });
   }
 }

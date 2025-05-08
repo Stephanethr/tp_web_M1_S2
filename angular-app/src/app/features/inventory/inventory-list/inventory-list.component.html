@@ -1,39 +1,40 @@
+<!-- src/app/features/inventory/inventory-list/inventory-list.component.html -->
 <div class="inventory-container">
-    <h2>{{ characterName }}'s Inventory</h2>
+  <div class="inventory-header">
+    <h2>Inventaire de {{ characterName }}</h2>
+    <button class="btn btn-primary" routerLink="/inventory/add">Ajouter un objet</button>
+  </div>
   
-    <div *ngIf="loading" class="text-center">
-      <div class="spinner-border"></div>
-      <p>Loading inventory...</p>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
     </div>
+  </div>
   
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+  <div *ngIf="!loading && items.length === 0" class="no-items">
+    <p>Vous n'avez pas encore d'objets dans votre inventaire.</p>
+    <button class="btn btn-primary" routerLink="/inventory/add">Ajouter un objet</button>
+  </div>
   
-    <div class="inventory-actions mb-3">
-      <a routerLink="/add-item" class="btn btn-success">Add New Item</a>
-    </div>
-  
-    <table *ngIf="!loading && items.length > 0" class="table table-striped inventory-table">
+  <div *ngIf="!loading && items.length > 0" class="inventory-table-container">
+    <table class="inventory-table">
       <thead>
         <tr>
-          <th (click)="onSort('item_name')" class="sortable">
-            Name
-            <i *ngIf="sortBy === 'item_name'" 
-               class="fa" 
-               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          <th (click)="sortInventory('item_name')">
+            Nom
+            <i class="bi" [ngClass]="sortBy === 'item_name' ? (order === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up') : 'bi-sort'"></i>
           </th>
-          <th (click)="onSort('item_type')" class="sortable">
+          <th (click)="sortInventory('item_type')">
             Type
-            <i *ngIf="sortBy === 'item_type'" 
-               class="fa" 
-               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+            <i class="bi" [ngClass]="sortBy === 'item_type' ? (order === 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-up') : 'bi-sort'"></i>
           </th>
-          <th (click)="onSort('item_quantity')" class="sortable">
-            Quantity
-            <i *ngIf="sortBy === 'item_quantity'" 
-               class="fa" 
-               [ngClass]="order === 'asc' ? 'fa-arrow-up' : 'fa-arrow-down'"></i>
+          <th (click)="sortInventory('item_quantity')">
+            Quantité
+            <i class="bi" [ngClass]="sortBy === 'item_quantity' ? (order === 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-up') : 'bi-sort'"></i>
           </th>
           <th>Actions</th>
         </tr>
@@ -41,24 +42,25 @@
       <tbody>
         <tr *ngFor="let item of items">
           <td>{{ item.name }}</td>
-          <td>{{ item.typeName }}</td>
-          <td>{{ item.quantity }}</td>
           <td>
-            <div class="btn-group">
-              <button *ngIf="isConsumable(item.typeName)" 
-                      (click)="consumeItem(item.id!)" 
-                      class="btn btn-sm btn-success">
-                Use
-              </button>
-              <a [routerLink]="['/edit', item.id]" class="btn btn-sm btn-primary">Edit</a>
-              <button (click)="deleteItem(item.id!)" class="btn btn-sm btn-danger">Delete</button>
-            </div>
+            <span class="badge" [ngClass]="getItemTypeClass(item.type_name)">
+              {{ item.type_name }}
+            </span>
+          </td>
+          <td>{{ item.quantity }}</td>
+          <td class="item-actions">
+            <button *ngIf="isConsumable(item.type_name)" class="btn btn-success btn-sm" (click)="consumeItem(item.id)">
+              <i class="bi bi-cup-hot"></i> Utiliser
+            </button>
+            <button class="btn btn-info btn-sm" [routerLink]="['/inventory/edit', item.id]">
+              <i class="bi bi-pencil"></i> Modifier
+            </button>
+            <button class="btn btn-danger btn-sm" (click)="deleteItem(item.id)">
+              <i class="bi bi-trash"></i> Supprimer
+            </button>
           </td>
         </tr>
       </tbody>
     </table>
-  
-    <div *ngIf="!loading && items.length === 0" class="alert alert-info">
-      Your inventory is empty. Add some items to get started!
-    </div>
   </div>
+</div>

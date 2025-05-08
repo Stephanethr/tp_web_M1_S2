@@ -1,104 +1,116 @@
-import { Component, OnInit, inject, DestroyRef } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { InventoryService } from 'src/app/core/services/inventory.service';
-import { Item } from 'src/app/core/models/item.model';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { InventoryService } from '../../../core/services/inventory.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-inventory-list',
-  templateUrl: './inventory-list.component.html',
-  styleUrls: ['./inventory-list.component.scss'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: './inventory-list.component.html',
+  styleUrls: ['./inventory-list.component.scss']
 })
 export class InventoryListComponent implements OnInit {
-  items: Item[] = [];
-  loading = false;
-  error = '';
-  sortBy = 'item_name';
-  order = 'asc';
-  characterName = '';
+  items: any[] = [];
+  loading: boolean = false;
+  errorMessage: string = '';
+  sortBy: string = 'name';
+  order: string = 'asc';
+  characterName: string = '';
+  
+  constructor(
+    private inventoryService: InventoryService,
+    private authService: AuthService
+  ) {}
 
-  private inventoryService = inject(InventoryService);
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
-
-  ngOnInit() {
-    // Check if user has an active character
-    if (!this.authService.currentUserValue?.activeCharacterId) {
-      this.router.navigate(['/character/list'], { 
-        queryParams: { returnUrl: '/inventory' } 
-      });
-      return;
-    }
-    
+  ngOnInit(): void {
     this.loadInventory();
   }
 
-  loadInventory() {
+  loadInventory(): void {
     this.loading = true;
-    this.inventoryService.getInventory(this.sortBy, this.order)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (data) => {
-          this.items = data;
-          this.loading = false;
-          // Utilisation de as any pour éviter l'erreur de typage
-          if (data.length > 0 && (data[0] as any).character_name) {
-            this.characterName = (data[0] as any).character_name;
-          }
-        },
-        error: (error) => {
-          this.error = error?.error?.message || 'Failed to load inventory';
-          this.loading = false;
+    this.inventoryService.getInventory(this.sortBy, this.order).subscribe({
+      next: (response: any) => {
+        if (response.success) {
+          this.items = response.items || [];
+          this.characterName = response.character_name || '';
+        } else {
+          this.errorMessage = response.message || 'Erreur lors du chargement de l\'inventaire';
         }
-      });
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du chargement de l\'inventaire';
+        this.loading = false;
+      }
+    });
   }
 
-  onSort(column: string) {
+  sortInventory(column: string): void {
     if (this.sortBy === column) {
-      // Toggle order if clicking the same column
       this.order = this.order === 'asc' ? 'desc' : 'asc';
     } else {
-      // Default to ascending when changing columns
       this.sortBy = column;
       this.order = 'asc';
     }
     this.loadInventory();
   }
 
-  deleteItem(itemId: number) {
-    if (confirm('Are you sure you want to delete this item?')) {
-      this.inventoryService.deleteItem(itemId)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
+  deleteItem(itemId: number): void {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet objet ?')) {
+      this.inventoryService.deleteItem(itemId).subscribe({
+        next: (response) => {
+          if (response.success) {
             this.loadInventory();
-          },
-          error: (error) => {
-            this.error = error?.error?.message || 'Failed to delete item';
+          } else {
+            this.errorMessage = response.message || 'Erreur lors de la suppression de l\'objet';
           }
-        });
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Erreur lors de la suppression de l\'objet';
+        }
+      });
     }
   }
 
-  consumeItem(itemId: number) {
-    this.inventoryService.consumeItem(itemId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
+  consumeItem(itemId: number): void {
+    this.inventoryService.consumeItem(itemId).subscribe({
+      next: (response) => {
+        if (response.success) {
           this.loadInventory();
-        },
-        error: (error) => {
-          this.error = error?.error?.message || 'Failed to consume item';
+        } else {
+          this.errorMessage = response.message || 'Erreur lors de la consommation de l\'objet';
         }
-      });
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors de la consommation de l\'objet';
+      }
+    });
   }
 
-  isConsumable(typeName: string): boolean {
-    return typeName === 'potion' || typeName === 'plante';
+  getItemTypeClass(typeName: string | undefined): string {
+    if (!typeName) return 'badge-secondary';
+    
+    switch (typeName.toLowerCase()) {
+      case 'potion':
+        return 'badge-success';
+      case 'arme':
+      case 'weapon':
+        return 'badge-danger';
+      case 'armure':
+      case 'armor':
+        return 'badge-info';
+      case 'plante':
+        return 'badge-warning';
+      default:
+        return 'badge-secondary';
+    }
+  }
+
+  isConsumable(typeName: string | undefined): boolean {
+    if (!typeName) return false;
+    return ['potion', 'plante'].includes(typeName.toLowerCase());
   }
 }

@@ -1,0 +1,113 @@
+<!-- src/app/features/characters/character-list/character-list.component.html -->
+<div class="characters-container">
+  <div class="characters-header">
+    <h2>Mes Personnages</h2>
+    <button class="btn btn-primary" routerLink="/characters/create">Créer un nouveau personnage</button>
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+  
+  <div *ngIf="!loading && characters.length === 0" class="no-characters">
+    <p>Vous n'avez pas encore de personnage.</p>
+    <button class="btn btn-primary" routerLink="/characters/create">Créer un personnage</button>
+  </div>
+  
+  <div *ngIf="!loading && characters.length > 0" class="character-list">
+    <div *ngFor="let character of characters" class="character-card" 
+         [ngClass]="{'character-card-selected': character.is_active}">
+      <div class="character-card-header">
+        <h3>{{ character.name }}</h3>
+        <span class="badge" [ngClass]="character.type === 'warrior' ? 'badge-warrior' : 'badge-mage'">
+          {{ character.type === 'warrior' ? 'Guerrier' : 'Mage' }}
+        </span>
+        <span *ngIf="character.is_active" class="badge badge-active">Actif</span>
+      </div>
+      
+      <div class="character-card-body">
+        <p>Race: {{ character.race }}</p>
+        <p>Niveau: {{ character.level }}</p>
+        <div class="stats">
+          <div class="stat">
+            <span class="stat-name">Santé</span>
+            <div class="progress">
+              <div class="progress-bar bg-danger" [style.width.%]="character.health"></div>
+            </div>
+            <span class="stat-value">{{ character.health }}</span>
+          </div>
+          
+          <div class="stat">
+            <span class="stat-name">Attaque</span>
+            <div class="progress">
+              <div class="progress-bar bg-primary" [style.width.%]="character.attack * 5"></div>
+            </div>
+            <span class="stat-value">{{ character.attack }}</span>
+          </div>
+          
+          <div class="stat">
+            <span class="stat-name">Défense</span>
+            <div class="progress">
+              <div class="progress-bar bg-success" [style.width.%]="character.defense * 10"></div>
+            </div>
+            <span class="stat-value">{{ character.defense }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="character-card-footer">
+        <button class="btn" 
+                [class.btn-primary]="!character.is_active" 
+                [class.btn-success]="character.is_active"
+                [disabled]="character.is_active"
+                (click)="selectCharacter(character.id)">
+          {{ character.is_active ? 'Personnage actif' : 'Sélectionner' }}
+        </button>
+        <button class="btn btn-outline-secondary" [routerLink]="['/character', character.id]">Détails</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Section Mode de Jeu - Visible uniquement quand un personnage est sélectionné -->
+  <div *ngIf="hasSelectedCharacter" class="game-modes-section">
+    <h3>Modes de jeu</h3>
+    <div class="game-modes-container">
+      <div class="game-mode-card">
+        <div class="mode-icon">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <h4>Quêtes</h4>
+        <p>Partez à l'aventure et relevez des défis pour gagner de l'expérience.</p>
+        <button class="btn btn-primary" routerLink="/game/quests">Jouer aux quêtes</button>
+      </div>
+      
+      <div class="game-mode-card">
+        <div class="mode-icon">
+          <i class="bi bi-dice-6"></i>
+        </div>
+        <h4>Plateau de jeu</h4>
+        <p>Avancez sur le plateau, lancez les dés et découvrez ce qui vous attend.</p>
+        <button class="btn btn-primary" routerLink="/game/board-game">Jouer au plateau</button>
+      </div>
+      
+      <div class="game-mode-card">
+        <div class="mode-icon">
+          <i class="bi bi-lightning-charge"></i>
+        </div>
+        <h4>Mode Versus</h4>
+        <p>Affrontez d'autres personnages dans des combats impitoyables.</p>
+        <button class="btn btn-primary" routerLink="/game/versus">Jouer en versus</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,92 +1,103 @@
-<div class="board-game-container">
-    <h2>Board Game</h2>
+<div class="board-game-container" [ngStyle]="{'background-color': styleData.background_color}">
+  <div class="board-game-header" [ngStyle]="{'color': styleData.header_color}">
+    <h2 [ngStyle]="{'font-size': styleData.game_title_font_size}">Jeu de Plateau</h2>
+    <a routerLink="/characters" class="btn btn-outline-secondary">Retour aux personnages</a>
+  </div>
   
-    <div *ngIf="loading && !gameState" class="text-center">
-      <div class="spinner-border"></div>
-      <p>Setting up the game board...</p>
-    </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
   
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
   
-    <div *ngIf="gameState" class="game-interface">
-      <div class="game-header">
-        <div class="player-info">
-          <h3>{{ gameState.hero.name }}</h3>
-          <div class="player-stats">
-            <div class="stat">
-              <span>Health:</span> 
-              <div class="health-bar">
-                <div 
-                  class="health-fill" 
-                  [style.width.%]="(gameState.hero.health / 100) * 100">
-                </div>
-                <span class="health-text">{{ gameState.hero.health }}/100</span>
-              </div>
-            </div>
-            <div class="stat">
-              <span>Attack:</span> {{ gameState.hero.attack }}
-            </div>
-            <div class="stat">
-              <span>Defense:</span> {{ gameState.hero.defense }}
-            </div>
-          </div>
-        </div>
-  
-        <div class="game-controls">
-          <button 
-            *ngIf="!gameFinished" 
-            [disabled]="loading" 
-            (click)="playTurn()" 
-            class="btn btn-primary roll-btn">
-            <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-            Roll Dice
-          </button>
-          <button 
-            *ngIf="gameFinished" 
-            (click)="restartGame()" 
-            class="btn btn-success">
-            Play Again
-          </button>
-          <a routerLink="/character/profile" class="btn btn-secondary">Back to Profile</a>
-        </div>
-  
-        <div *ngIf="diceRoll" class="dice-result">
-          <div class="dice">
-            <span>{{ diceRoll }}</span>
-          </div>
-        </div>
-      </div>
-  
-      <div class="game-board">
-        <div 
-          *ngFor="let cell of gameState.board; let i = index" 
-          class="board-cell"
-          [ngClass]="[getBoardElementClass(cell, i), getPositionClass(i)]">
-          
-          <div class="cell-content">
-            <span *ngIf="cell?.type === 'enemy'" class="enemy-icon">👹</span>
-            <span *ngIf="cell?.type === 'item'" class="item-icon">🎁</span>
-            <span *ngIf="!cell" class="empty-icon">•</span>
-          </div>
-          
-          <div class="position-marker">
-            {{ i + 1 }}
-          </div>
-        </div>
-      </div>
-  
-      <div class="game-log">
-        <h4>Game Log - Turn {{ currentTurn }}</h4>
-        <div class="log-entries">
-          <div *ngFor="let entry of gameLog" class="log-entry">
-            {{ entry }}
-          </div>
-          <div *ngIf="gameLog.length === 0" class="empty-log">
-            The game has begun. Roll the dice to start your adventure!
-          </div>
-        </div>
-      </div>
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
     </div>
   </div>
+  
+  <div *ngIf="!loading && character && plateauGame" class="board-game-content" [ngStyle]="{'color': styleData.text_color, 'font-family': styleData.font_family, 'font-size': styleData.font_size}">
+    <div class="character-info">
+      <h3>{{ character.name }}</h3>
+      <div class="character-stats">
+        <div class="stat">
+          <span class="stat-name">Santé:</span>
+          <span class="stat-value">{{ character.health }}/100</span>
+        </div>
+        <div class="stat">
+          <span class="stat-name">Niveau:</span>
+          <span class="stat-value">{{ character.level }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Ajout des contrôles pour lancer le dé -->
+    <div class="game-controls">
+      <button class="btn btn-success" (click)="rollDiceAndMove()" [disabled]="loading">
+        <i class="bi bi-dice-6"></i> Lancer le dé
+      </button>
+      
+      <!-- Boutons de direction (si applicables dans votre jeu) -->
+      <div class="direction-controls" *ngIf="plateauGame.allow_directional_move">
+        <button class="btn btn-primary direction-btn" (click)="chooseDirection('up')" [disabled]="loading">
+          <i class="bi bi-arrow-up"></i>
+        </button>
+        <div class="middle-row">
+          <button class="btn btn-primary direction-btn" (click)="chooseDirection('left')" [disabled]="loading">
+            <i class="bi bi-arrow-left"></i>
+          </button>
+          <button class="btn btn-primary direction-btn" (click)="chooseDirection('right')" [disabled]="loading">
+            <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+        <button class="btn btn-primary direction-btn" (click)="chooseDirection('down')" [disabled]="loading">
+          <i class="bi bi-arrow-down"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Plateau de jeu -->
+    <div class="game-board" [ngStyle]="{'border': styleData.board_border}">
+      <div class="board-cells">
+        <div *ngFor="let cell of plateauGame.board; let i = index" class="board-cell" 
+             [ngClass]="{
+               'cell-current': i === plateauGame.current_position,
+               'cell-empty': cell === null,
+               'cell-item': cell && cell.type,
+               'cell-enemy': cell && cell.name
+             }">
+          {{ i + 1 }}
+          <div class="cell-content" *ngIf="cell">
+            <span *ngIf="cell.type">{{ cell.name }}</span>
+            <span *ngIf="cell.health">{{ cell.name }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Journal de jeu -->
+    <div class="game-result" [ngStyle]="{'color': styleData.text_color}">
+      <h3>Déroulement du jeu</h3>
+      <pre class="game-log">{{ gameResult }}</pre>
+      
+      <div class="game-status">
+        <div *ngIf="plateauGame.is_completed" class="game-completed">
+          <h4>Félicitations !</h4>
+          <p>Vous avez terminé le plateau avec succès !</p>
+        </div>
+        
+        <div *ngIf="plateauGame.is_game_over" class="game-over">
+          <h4>Game Over</h4>
+          <p>Votre personnage est mort durant le jeu.</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="game-actions">
+      <button class="btn" [ngStyle]="{'background-color': styleData.button_color, 'color': styleData.text_color}" (click)="startGame()">Rejouer</button>
+      <a routerLink="/characters" class="btn btn-secondary">Retour aux personnages</a>
+    </div>
+  </div>
+</div>

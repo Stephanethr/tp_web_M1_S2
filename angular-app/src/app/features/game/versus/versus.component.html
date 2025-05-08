@@ -1,162 +1,158 @@
 <div class="versus-container">
-    <h2>Versus Mode</h2>
+  <div class="versus-header">
+    <h2>Mode Versus</h2>
+    <a routerLink="/characters" class="btn btn-outline-secondary">Retour aux personnages</a>
+  </div>
   
-    <div *ngIf="loading && !characters.length" class="text-center">
-      <div class="spinner-border"></div>
-      <p>Loading characters...</p>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
     </div>
+  </div>
   
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
-    </div>
+  <div *ngIf="!loading && characters.length < 2" class="no-characters">
+    <p>Vous avez besoin d'au moins deux personnages pour le mode versus.</p>
+    <a routerLink="/characters/create" class="btn btn-primary">Créer un personnage</a>
+  </div>
   
-    <div *ngIf="!showResult && characters.length > 0" class="fighters-selection">
-      <div class="fighters-form">
-        <div class="form-group">
-          <label for="player1">Fighter 1</label>
-          <select 
-            id="player1" 
-            [(ngModel)]="player1Id" 
-            class="form-control" 
-            [disabled]="loading">
-            <option [ngValue]="null">Select character...</option>
-            <option *ngFor="let char of characters" [value]="char.id">
-              {{ char.name }} (Level {{ char.level }} {{ char.type === 'warrior' ? 'Warrior' : 'Mage' }})
-            </option>
-          </select>
-        </div>
-        
-        <div class="versus-divider">VS</div>
-        
-        <div class="form-group">
-          <label for="player2">Fighter 2</label>
-          <select 
-            id="player2" 
-            [(ngModel)]="player2Id" 
-            class="form-control" 
-            [disabled]="loading">
-            <option [ngValue]="null">Select character...</option>
-            <option *ngFor="let char of characters" [value]="char.id">
-              {{ char.name }} (Level {{ char.level }} {{ char.type === 'warrior' ? 'Warrior' : 'Mage' }})
-            </option>
-          </select>
-        </div>
+  <div *ngIf="!loading && characters.length >= 2 && !fightResult" class="versus-selection">
+    <div class="versus-form">
+      <div class="form-group">
+        <label for="player1">Personnage 1</label>
+        <select id="player1" [(ngModel)]="player1Id" class="form-select">
+          <option [value]="null" disabled>Sélectionnez un personnage</option>
+          <option *ngFor="let character of characters" [value]="character.id">
+            {{ character.name }} - {{ character.type === 'warrior' ? 'Guerrier' : 'Mage' }} (Niv. {{ character.level }})
+          </option>
+        </select>
       </div>
       
-      <div class="fighters-preview">
-        <div class="fighter fighter-1" *ngIf="player1Id">
-          <div class="character-avatar" 
-               [ngClass]="(characters.find(c => c.id === player1Id)?.race.toLowerCase() || '') + '-' + 
-                        (characters.find(c => c.id === player1Id)?.type || '')">
-            <i class="fa" 
-               [ngClass]="characters.find(c => c.id === player1Id)?.type === 'warrior' ? 'fa-shield-alt' : 'fa-hat-wizard'"></i>
-          </div>
-          <h3>{{ getCharacterName(player1Id) }}</h3>
-        </div>
-        
-        <div class="fighter fighter-placeholder" *ngIf="!player1Id">
-          <div class="character-avatar-placeholder">
-            <i class="fa fa-question"></i>
-          </div>
-          <h3>Select Fighter 1</h3>
-        </div>
-        
-        <div class="versus-icon">VS</div>
-        
-        <div class="fighter fighter-2" *ngIf="player2Id">
-          <div class="character-avatar" 
-               [ngClass]="(characters.find(c => c.id === player2Id)?.race.toLowerCase() || '') + '-' + 
-                        (characters.find(c => c.id === player2Id)?.type || '')">
-            <i class="fa" 
-               [ngClass]="characters.find(c => c.id === player2Id)?.type === 'warrior' ? 'fa-shield-alt' : 'fa-hat-wizard'"></i>
-          </div>
-          <h3>{{ getCharacterName(player2Id) }}</h3>
-        </div>
-        
-        <div class="fighter fighter-placeholder" *ngIf="!player2Id">
-          <div class="character-avatar-placeholder">
-            <i class="fa fa-question"></i>
-          </div>
-          <h3>Select Fighter 2</h3>
-        </div>
-      </div>
+      <div class="versus-separator">VS</div>
       
-      <div class="fight-actions">
-        <button 
-          (click)="startFight()" 
-          class="btn btn-danger btn-lg"
-          [disabled]="loading || !player1Id || !player2Id || player1Id === player2Id">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-          Start Fight!
-        </button>
+      <div class="form-group">
+        <label for="player2">Personnage 2</label>
+        <select id="player2" [(ngModel)]="player2Id" class="form-select">
+          <option [value]="null" disabled>Sélectionnez un personnage</option>
+          <option *ngFor="let character of characters" [value]="character.id">
+            {{ character.name }} - {{ character.type === 'warrior' ? 'Guerrier' : 'Mage' }} (Niv. {{ character.level }})
+          </option>
+        </select>
       </div>
     </div>
-  
-    <div *ngIf="showResult && fightResult" class="fight-result">
-      <h3>Battle Result</h3>
-      
-      <div class="result-header" [ngClass]="fightResult.winner === getCharacterName(player1Id!) ? 'victory-1' : 'victory-2'">
-        <div class="result-title">
-          {{ fightResult.winner }} Wins!
+    
+    <div class="versus-preview" *ngIf="player1Id && player2Id">
+      <div class="character-card">
+        <h3>{{ getCharacterById(player1Id)?.name }}</h3>
+        <div class="character-stats">
+          <div class="stat">
+            <span class="stat-name">Santé:</span>
+            <span class="stat-value">{{ getCharacterById(player1Id)?.health }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-name">Attaque:</span>
+            <span class="stat-value">{{ getCharacterById(player1Id)?.attack }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-name">Défense:</span>
+            <span class="stat-value">{{ getCharacterById(player1Id)?.defense }}</span>
+          </div>
         </div>
       </div>
       
-      <div class="combatants">
-        <div class="fighter-info">
-          <h4>{{ getCharacterName(player1Id!) }}</h4>
-          <div class="health-display">
-            <div class="health-bar">
-              <div class="health-fill fighter-1" 
-                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].player1Health / fightResult.players!.player1.originalHealth) * 100">
-              </div>
-            </div>
-            <span class="health-text">
-              {{ fightResult.rounds[fightResult.rounds.length-1].player1Health }} / {{ fightResult.players!.player1.originalHealth }}
-            </span>
+      <div class="versus-icon">VS</div>
+      
+      <div class="character-card">
+        <h3>{{ getCharacterById(player2Id)?.name }}</h3>
+        <div class="character-stats">
+          <div class="stat">
+            <span class="stat-name">Santé:</span>
+            <span class="stat-value">{{ getCharacterById(player2Id)?.health }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-name">Attaque:</span>
+            <span class="stat-value">{{ getCharacterById(player2Id)?.attack }}</span>
+          </div>
+          <div class="stat">
+            <span class="stat-name">Défense:</span>
+            <span class="stat-value">{{ getCharacterById(player2Id)?.defense }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="versus-actions">
+      <button class="btn btn-primary" [disabled]="!player1Id || !player2Id" (click)="startFight()">Lancer le combat</button>
+    </div>
+  </div>
+  
+  <div *ngIf="fightResult" class="fight-result">
+    <h3>Résultat du combat</h3>
+    
+    <div class="battle-summary">
+      <div class="battle-participants">
+        <div class="player1">
+          <h4>{{ fightResult.players.player1.name }}</h4>
+          <div class="health-bar">
+            <div class="health-progress" [style.width.%]="(fightResult.players.player1.original_health / 100) * 100"></div>
           </div>
         </div>
         
-        <div class="vs">VS</div>
+        <div class="versus">VS</div>
         
-        <div class="fighter-info">
-          <h4>{{ getCharacterName(player2Id!) }}</h4>
-          <div class="health-display">
-            <div class="health-bar">
-              <div class="health-fill fighter-2" 
-                   [style.width.%]="(fightResult.rounds[fightResult.rounds.length-1].player2Health / fightResult.players!.player2.originalHealth) * 100">
-              </div>
-            </div>
-            <span class="health-text">
-              {{ fightResult.rounds[fightResult.rounds.length-1].player2Health }} / {{ fightResult.players!.player2.originalHealth }}
-            </span>
+        <div class="player2">
+          <h4>{{ fightResult.players.player2.name }}</h4>
+          <div class="health-bar">
+            <div class="health-progress" [style.width.%]="(fightResult.players.player2.original_health / 100) * 100"></div>
           </div>
         </div>
       </div>
       
       <div class="battle-rounds">
-        <h4>Battle Log</h4>
-        <div class="rounds-container">
-          <div *ngFor="let round of fightResult.rounds" class="round">
-            <div class="round-header">Round {{ round.round }}</div>
+        <div *ngFor="let round of fightResult.rounds" class="battle-round">
+          <h5>Tour {{ round.round }}</h5>
+          <div class="round-details">
+            <div class="player1-health">Santé de {{ fightResult.players.player1.name }}: {{ round.player1_health }}</div>
+            <div class="player2-health">Santé de {{ fightResult.players.player2.name }}: {{ round.player2_health }}</div>
+            
             <div *ngIf="round.initiative" class="initiative">
-              {{ round.initiative }} has the initiative
+              Initiative: {{ round.initiative }}
             </div>
-            <div *ngIf="round.damageToPlayer1" class="damage player2-damage">
-              {{ getCharacterName(player2Id!) }} deals {{ round.damageToPlayer1 }} damage to {{ getCharacterName(player1Id!) }}
+            
+            <div *ngIf="round.damage_to_player1" class="damage-taken">
+              {{ fightResult.players.player2.name }} inflige {{ round.damage_to_player1 }} points de dégâts à {{ fightResult.players.player1.name }}
             </div>
-            <div *ngIf="round.damageToPlayer2" class="damage player1-damage">
-              {{ getCharacterName(player1Id!) }} deals {{ round.damageToPlayer2 }} damage to {{ getCharacterName(player2Id!) }}
+            
+            <div *ngIf="round.damage_to_player2" class="damage-dealt">
+              {{ fightResult.players.player1.name }} inflige {{ round.damage_to_player2 }} points de dégâts à {{ fightResult.players.player2.name }}
             </div>
+            
             <div *ngIf="round.winner" class="round-winner">
-              {{ round.winner }} wins the battle!
+              {{ round.winner }} remporte ce tour!
             </div>
           </div>
         </div>
       </div>
       
-      <div class="result-actions">
-        <button (click)="resetFight()" class="btn btn-primary">New Battle</button>
-        <a routerLink="/character/profile" class="btn btn-secondary">Character Profile</a>
+      <div class="battle-result">
+        <h4>Résultat final</h4>
+        <div class="winner">{{ fightResult.winner }} a gagné le combat!</div>
       </div>
     </div>
+    
+    <div class="fight-actions">
+      <button class="btn btn-primary" (click)="fightResult = null">Nouveau combat</button>
+      <a routerLink="/characters" class="btn btn-secondary">Retour aux personnages</a>
+    </div>
   </div>
+</div>
+<div *ngIf="errorMessage" class="alert alert-danger">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="successMessage" class="alert alert-success">
+  {{ successMessage }}
+</div>
