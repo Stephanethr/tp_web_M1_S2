@@ -10,7 +10,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [errors, setErrors] = useState({});
@@ -30,7 +30,7 @@ const Login = () => {
     
     // Validation simple
     const newErrors = {};
-    if (!formData.username) newErrors.username = 'Le nom d\'utilisateur est requis';
+    if (!formData.email) newErrors.email = 'Le nom d\'utilisateur est requis';
     if (!formData.password) newErrors.password = 'Le mot de passe est requis';
     
     if (Object.keys(newErrors).length > 0) {
@@ -41,8 +41,8 @@ const Login = () => {
     try {
       setIsLoading(true);
       const data = await loginUser({
-        user_login: formData.username,
-        user_pwd: formData.password,
+        email: formData.email,
+        password: formData.password,
       });
       
       // Si la connexion réussit et que l'API renvoie un token
@@ -91,14 +91,14 @@ const Login = () => {
           
           <div className="rounded-md shadow-sm -space-y-px">
             <Input
-              id="username"
-              name="username"
+              id="email"
+              name="email"
               type="text"
-              label="Nom d'utilisateur"
-              value={formData.username}
+              label="Adresse e-mail"
+              value={formData.email}
               onChange={handleChange}
               required
-              error={errors.username}
+              error={errors.email}
             />
             
             <Input

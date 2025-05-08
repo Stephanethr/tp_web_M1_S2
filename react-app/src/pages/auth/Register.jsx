@@ -62,9 +62,9 @@ const Register = () => {
     try {
       setIsLoading(true);
       const data = await registerUser({
-        user_login: formData.username,
-        user_mail: formData.email,
-        user_pwd: formData.password,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
       });
       
       // Si l'inscription réussit et que l'API renvoie un token
