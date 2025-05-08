@@ -1,6 +1,6 @@
 // src/context/CharacterContext.jsx
-import React, { createContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
+//import { useNavigate } from 'react-router-dom';
 import { 
   getAllCharacters, 
   getCharacterById, 
@@ -14,7 +14,7 @@ export const CharacterContext = createContext();
 
 export const CharacterProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [characters, setCharacters] = useState([]);
   const [activeCharacter, setActiveCharacter] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,4 +138,4 @@ export const CharacterProvider = ({ children }) => {
   );
 };
 
-export default CharacterContext;
+export const useCharacter = () => useContext(CharacterContext);
