@@ -1,4 +1,3 @@
-// src/pages/characters/CharacterList.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCharacters } from '../../hooks/useCharacters';

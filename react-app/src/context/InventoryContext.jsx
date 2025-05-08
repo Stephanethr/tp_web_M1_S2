@@ -18,7 +18,7 @@ export const InventoryProvider = ({ children }) => {
     
     try {
       setLoading(true);
-      const { data } = await inventoryAPI.getAll(activeCharacter.id);
+      const { data }  = await inventoryAPI.getInventory(activeCharacter.id);
       setInventory(data.items);
       setEquipped(data.equipped);
     } catch (err) {

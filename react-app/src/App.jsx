@@ -10,7 +10,7 @@ import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import CharacterList from './pages/characters/CharacterList';
-import CreateCharacter from './pages/characters/CreateCharacter';
+import CharacterCreate from './pages/characters/CharacterCreate';
 import CharacterDetail from './pages/characters/CharacterDetail';
 import InventoryPage from './pages/inventory/InventoryPage';
 import NotFound from './pages/NotFound';
@@ -52,9 +52,9 @@ function App() {
                       <CharacterList />
                     </div>
                   } />
-                  <Route path="new" element={
+                  <Route path="create" element={
                     <div className="container mx-auto px-4 py-8">
-                      <CreateCharacter />
+                      <CharacterCreate />
                     </div>
                   } />
                   <Route path=":id" element={

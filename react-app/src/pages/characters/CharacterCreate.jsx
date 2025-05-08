@@ -6,7 +6,7 @@ import { useCharacters } from '../../hooks/useCharacters';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 
-const CreateCharacter = () => {
+const CharacterCreate = () => {
   const navigate = useNavigate();
   const { createCharacter, loadCharacters } = useCharacters();
   
@@ -206,4 +206,4 @@ const CreateCharacter = () => {
   );
 };
 
-export default CreateCharacter;
+export default CharacterCreate;

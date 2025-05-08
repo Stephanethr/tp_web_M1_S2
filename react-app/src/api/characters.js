@@ -50,3 +50,12 @@ export const deleteCharacter = async (characterId) => {
     throw error.response?.data || { error: 'Erreur lors de la suppression du personnage' };
   }
 };
+
+export const haveActiveCharacter = async () => {
+  try {
+    const response = await API.get('/characters/active/');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { error: 'Erreur lors de la récupération du personnage actif' };
+  }
+}

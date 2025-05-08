@@ -6,7 +6,8 @@ import {
   getCharacterById, 
   selectActiveCharacter, 
   createCharacter, 
-  deleteCharacter 
+  deleteCharacter,
+  haveActiveCharacter
 } from '../api/characters';
 import { useAuth } from '../hooks/useAuth';
 
@@ -14,9 +15,8 @@ export const CharacterContext = createContext();
 
 export const CharacterProvider = ({ children }) => {
   const { isAuthenticated } = useAuth();
-  //const navigate = useNavigate();
   const [characters, setCharacters] = useState([]);
-  const [activeCharacter, setActiveCharacter] = useState(null);
+  const [activeCharacter, setActiveCharacter] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,15 +28,11 @@ export const CharacterProvider = ({ children }) => {
       setIsLoading(true);
       const data = await getAllCharacters();
       
+      
       setCharacters(data.characters || []);
       
-      // Mettre à jour le personnage actif s'il existe
-      if (data.active_character) {
-        setActiveCharacter(data.active_character);
-      } else {
-        setActiveCharacter(null);
-      }
-      
+      setActiveCharacter(data.characters.find(character => character.is_active === true));
+
       setError(null);
     } catch (err) {
       console.error('Erreur lors du chargement des personnages:', err);
@@ -111,6 +107,20 @@ export const CharacterProvider = ({ children }) => {
     }
   }, [loadCharacters]);
 
+  const checkActiveCharacter = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const data = await haveActiveCharacter();
+      return data.active;
+    } catch (err) {
+      console.error('Erreur lors de la récupération du personnage actif:', err);
+      setError(err.error || 'Erreur lors de la récupération du personnage actif');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadCharacters]);
+
   // Charger les personnages au montage du composant ou quand l'authentification change
   useEffect(() => {
     if (isAuthenticated) {
@@ -129,6 +139,7 @@ export const CharacterProvider = ({ children }) => {
     loadCharacterDetails,
     createCharacter: createNewCharacter,
     deleteCharacter: removeCharacter,
+    checkActiveCharacter,
   };
 
   return (

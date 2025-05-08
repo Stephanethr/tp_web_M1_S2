@@ -2,8 +2,8 @@ import { useInventory } from '../../context/InventoryContext';
 import { useCharacter } from '../../context/CharacterContext';
 
 export const InventoryPage = () => {
-  const { inventory, equipped, loading, error } = useInventory();
-  const { activeCharacter } = useCharacter();
+  const { inventory, equipped, loading, error, handleDelete, handleUse, handleEquip } = useInventory();
+  const { activeCharacter} = useCharacter();
 
   if (!activeCharacter) {
     return <div className="p-4">Veuillez sélectionner un personnage</div>;
