@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { CharacterContext } from './CharacterContext';
-import { inventoryAPI } from '../api/inventory';
+import { getInventory, toggleItem, consumeItem, deleteItem } from '../api/inventory';
 
 const InventoryContext = createContext();
 
 export const InventoryProvider = ({ children }) => {
   const { user } = useAuth();
   const { activeCharacter } = useContext(CharacterContext);
-  const [inventory, setInventory] = useState([]);
-  const [equipped, setEquipped] = useState({});
+  let [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,14 +17,14 @@ export const InventoryProvider = ({ children }) => {
     
     try {
       setLoading(true);
-      const { data }  = await inventoryAPI.getInventory(activeCharacter.id);
+      const data = await getInventory();
       setInventory(data.items);
-      setEquipped(data.equipped);
+      console.log('Inventory data:', inventory);
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur de chargement');
     } finally {
       setLoading(false);
-    }
+    } 
   }, [activeCharacter]);
 
   useEffect(() => {
@@ -34,7 +33,7 @@ export const InventoryProvider = ({ children }) => {
 
   const handleEquip = async (itemId, slot) => {
     try {
-      await inventoryAPI.equipItem(itemId);
+      await toggleItem(itemId);
       await loadInventory();
     } catch (err) {
       setError(err.response?.data?.message || 'Échec de léquipement');
@@ -43,7 +42,7 @@ export const InventoryProvider = ({ children }) => {
 
   const handleUse = async (itemId) => {
     try {
-      await inventoryAPI.useItem(itemId);
+      await consumeItem(itemId);
       await loadInventory();
     } catch (err) {
       setError(err.response?.data?.message || 'Utilisation impossible');
@@ -52,7 +51,7 @@ export const InventoryProvider = ({ children }) => {
 
   const handleDelete = async (itemId) => {
     try {
-      await inventoryAPI.deleteItem(itemId);
+      await deleteItem(itemId);
       setInventory(prev => prev.filter(item => item.id !== itemId));
     } catch (err) {
       setError(err.response?.data?.message || 'Suppression échouée');
@@ -63,7 +62,6 @@ export const InventoryProvider = ({ children }) => {
     <InventoryContext.Provider 
       value={{
         inventory,
-        equipped,
         loading,
         error,
         handleEquip,
