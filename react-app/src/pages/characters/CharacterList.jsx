@@ -1,4 +1,3 @@
-// src/pages/characters/CharacterList.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCharacters } from '../../hooks/useCharacters';
@@ -11,8 +10,6 @@ const getClassIcon = (characterClass) => {
   const classIcons = {
     'warrior': '⚔️',
     'mage': '🔮',
-    'archer': '🏹',
-    'healer': '💉',
     // Ajouter d'autres classes selon votre jeu
     'default': '👤'
   };
@@ -22,8 +19,7 @@ const getClassIcon = (characterClass) => {
 const getRaceIcon = (race) => {
   const raceIcons = {
     'human': '👨',
-    'elf': '🧝',
-    'dwarf': '🧔',
+    'werewolf': '',
     'orc': '👹',
     // Ajouter d'autres races selon votre jeu
     'default': '👤'
