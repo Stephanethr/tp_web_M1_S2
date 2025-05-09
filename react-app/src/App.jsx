@@ -33,9 +33,10 @@ function App() {
 
                 <Routes>
                   {/* Page d'accueil */}
+                  
                   <Route path="/" element={
                     <div className="container mx-auto px-4 py-8">
-                      <ProtectedRoute><Home /></ProtectedRoute>
+                      <Home />
                     </div>
                   } />
 

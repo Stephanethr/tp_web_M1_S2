@@ -48,7 +48,7 @@ const Login = () => {
       // Si la connexion réussit et que l'API renvoie un token
       if (data.token) {
         login(data.user, data.token);
-        navigate('/dashboard');
+        navigate('/');
       }
     } catch (error) {
       if (error.error) {
