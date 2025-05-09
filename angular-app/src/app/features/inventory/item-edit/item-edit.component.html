@@ -1,67 +1,81 @@
+<!-- src/app/features/inventory/item-edit/item-edit.component.html -->
 <div class="item-edit-container">
-    <h2>{{ isAddMode ? 'Add Item' : 'Edit Item' }}</h2>
-  
-    <div *ngIf="loading" class="text-center">
-      <div class="spinner-border"></div>
-      <p>Loading...</p>
+  <div class="item-edit-card">
+    <h2>{{ isEditMode ? 'Modifier' : 'Ajouter' }} un objet</h2>
+
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
     </div>
-  
-    <div *ngIf="error" class="alert alert-danger">
-      {{ error }}
+
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
     </div>
-  
-    <form *ngIf="!loading" [formGroup]="itemForm" (ngSubmit)="onSubmit()">
+
+    <form [formGroup]="itemForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="name">Item Name</label>
-        <input 
-          type="text" 
-          formControlName="name" 
-          class="form-control" 
-          [ngClass]="{ 'is-invalid': submitted && f['name'].errors }" 
-        />
-        <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
-          <div *ngIf="f['name'].errors['required']">Item name is required</div>
-          <div *ngIf="f['name'].errors['minlength']">Name must be at least 2 characters</div>
+        <label for="name">Nom de l'objet</label>
+        <input type="text" id="name" formControlName="name" class="form-control"
+          [ngClass]="{'is-invalid': itemForm.controls['name'].touched && itemForm.controls['name'].invalid}">
+        <div *ngIf="itemForm.controls['name'].touched && itemForm.controls['name'].invalid" class="invalid-feedback">
+          <div *ngIf="itemForm.controls['name'].errors?.['required']">Le nom de l'objet est requis</div>
         </div>
       </div>
-      
+
       <div class="form-group">
-        <label for="typeId">Item Type</label>
-        <select
-          formControlName="typeId"
-          class="form-control"
-          [ngClass]="{ 'is-invalid': submitted && f['typeId'].errors }"
-        >
-          <option value="" disabled>Select item type</option>
-          <option *ngFor="let type of itemTypes" [value]="type.id">
-            {{ type.typeName }}
-          </option>
-        </select>
-        <div *ngIf="submitted && f['typeId'].errors" class="invalid-feedback">
-          <div *ngIf="f['typeId'].errors['required']">Item type is required</div>
+        <label>Type d'objet</label>
+        <div class="item-types-container">
+          <div *ngFor="let type of itemTypes" class="item-type-card"
+            [class.selected]="itemForm.value.type_id === type.id" 
+            (click)="itemForm.get('type_id')?.setValue(type.id)">
+            <div class="item-type-icon">
+              <i class="bi" [ngClass]="getItemTypeIcon(type.id)"></i>
+            </div>
+            <div class="item-type-name">
+              <span class="badge" [ngClass]="getItemTypeClass(type.id)">{{ type.type_name }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Champ caché pour maintenir la valeur du formulaire -->
+        <input type="hidden" formControlName="type_id">
+
+        <div *ngIf="itemForm.controls['type_id'].touched && itemForm.controls['type_id'].invalid"
+          class="invalid-feedback d-block">
+          <div *ngIf="itemForm.controls['type_id'].errors?.['required']">Le type d'objet est requis</div>
         </div>
       </div>
-      
+
       <div class="form-group">
-        <label for="quantity">Quantity</label>
-        <input 
-          type="number" 
-          formControlName="quantity" 
-          class="form-control" 
-          [ngClass]="{ 'is-invalid': submitted && f['quantity'].errors }" 
-        />
-        <div *ngIf="submitted && f['quantity'].errors" class="invalid-feedback">
-          <div *ngIf="f['quantity'].errors['required']">Quantity is required</div>
-          <div *ngIf="f['quantity'].errors['min']">Quantity must be at least 1</div>
+        <label for="quantity">Quantité</label>
+        <input type="number" id="quantity" formControlName="quantity" class="form-control"
+          [ngClass]="{'is-invalid': itemForm.controls['quantity'].touched && itemForm.controls['quantity'].invalid}"
+          min="1">
+        <div *ngIf="itemForm.controls['quantity'].touched && itemForm.controls['quantity'].invalid"
+          class="invalid-feedback">
+          <div *ngIf="itemForm.controls['quantity'].errors?.['required']">La quantité est requise</div>
+          <div *ngIf="itemForm.controls['quantity'].errors?.['min']">La quantité doit être au moins 1</div>
         </div>
       </div>
-      
-      <div class="form-group">
-        <button [disabled]="loading" class="btn btn-primary">
-          <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
-          {{ isAddMode ? 'Add Item' : 'Save Changes' }}
+
+      <div class="item-preview" *ngIf="itemForm.valid">
+        <h3>Aperçu de l'objet</h3>
+        <div class="item-preview-content">
+          <div class="preview-name">{{ itemForm.value.name }}</div>
+          <div class="preview-type">
+            <span class="badge" [ngClass]="getItemTypeClass(itemForm.value.type_id)">
+              {{ getItemTypeName(itemForm.value.type_id) }}
+            </span>
+          </div>
+          <div class="preview-quantity">Quantité: {{ itemForm.value.quantity }}</div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid || loading">
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isEditMode ? 'Modifier' : 'Ajouter' }} l'objet
         </button>
-        <a routerLink="/inventory" class="btn btn-link">Cancel</a>
+        <button type="button" class="btn btn-secondary" routerLink="/inventory">Annuler</button>
       </div>
     </form>
   </div>
+</div>

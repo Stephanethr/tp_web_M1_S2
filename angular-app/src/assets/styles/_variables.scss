@@ -1,0 +1,129 @@
+// Couleurs principales
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$success-color: #28a745;
+$danger-color: #dc3545;
+$warning-color: #ffc107;
+$info-color: #17a2b8;
+$light-color: #f8f9fa;
+$dark-color: #343a40;
+
+// Couleurs fonctionnelles
+$background-color: #f8f9fa;
+$text-color: #333;
+$border-color: #dee2e6;
+
+// Couleurs de navigation
+$nav-text-color: #333; // Couleur de texte pour les onglets
+$nav-active-bg: $primary-color; // Fond pour l'onglet actif
+$nav-active-text: #333; // Texte pour l'onglet actif
+$nav-hover-bg: rgba(0, 123, 255, 0.1); // Fond pour l'onglet survolé
+$nav-bg: rgba(248, 249, 250, 0.7); // Fond pour les onglets standards
+
+// Typographie
+$font-family-sans-serif: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+$font-size-base: 1rem;
+$font-size-lg: 1.25rem;
+$font-size-sm: 0.875rem;
+$font-weight-normal: 400;
+$font-weight-bold: 600;
+$font-weight-bolder: 700;
+
+// Bordures et espacements
+$border-radius: 0.25rem;
+$border-radius-lg: 0.3rem;
+$border-radius-sm: 0.2rem;
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * 0.25,
+  2: $spacer * 0.5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3
+);
+
+// Ombres
+$box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 5px 15px rgba(0, 0, 0, 0.15);
+
+// Points de rupture (breakpoints)
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px
+);
+
+// Variables pour les cartes de personnage
+$character-card-shadow: $box-shadow;
+$character-card-shadow-hover: $box-shadow-lg;
+$character-card-selected-border: 2px solid $success-color;
+$character-card-selected-bg: rgba(40, 167, 69, 0.05);
+
+// Variables pour les badges
+$badge-warrior-bg: $danger-color;
+$badge-mage-bg: $primary-color;
+$badge-level-bg: $secondary-color;
+$badge-active-bg: $success-color;
+
+// Variables pour les modes de jeu
+$game-mode-card-padding: 20px;
+$game-mode-icon-size: 2rem;
+$game-mode-icon-color: $primary-color;
+
+// Couleurs de classe
+$warrior-color: #e74c3c;
+$mage-color: #3498db;
+$vampire-color: #8e44ad;
+$werewolf-color: #795548;
+$human-color: #f39c12;
+
+// Effets visuels
+$card-hover-elevation: 0 8px 15px rgba(0, 0, 0, 0.2);
+$glow-effect: 0 0 10px rgba(0, 123, 255, 0.5);
+$soft-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+// Variables pour le jeu de plateau
+$cell-size: 80px;
+$board-bg: #2a3142;
+$cell-border: 1px solid rgba(255, 255, 255, 0.1);
+$cell-empty-bg: rgba(255, 255, 255, 0.05);
+$cell-item-bg: rgba(40, 167, 69, 0.8);
+$cell-enemy-bg: rgba(220, 53, 69, 0.8);
+$cell-current-bg: rgba(0, 123, 255, 0.8);
+$cell-current-glow: 0 0 15px rgba(0, 123, 255, 0.8);
+
+// Variables pour les animations
+$transition-duration: 0.3s;
+$transition-timing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+// Styles de combat
+$health-bar-height: 15px;
+$health-bar-radius: 8px;
+$health-bar-bg: rgba(220, 53, 69, 0.2);
+$health-progress-bg: #dc3545;
+
+// Styles de quête
+$quest-easy-color: #28a745;
+$quest-medium-color: #ffc107;
+$quest-hard-color: #dc3545;
+
+// Styles de personnage
+$character-card-bg: white;
+$character-header-bg: #f8f9fa;
+$character-stats-padding: 15px;
+$character-avatar-size: 150px;
+
+// Badges et étiquettes
+$badge-padding: 5px 10px;
+$badge-radius: 5px;
+$badge-font-size: 0.85rem;
+$badge-font-weight: 600;
+
+// Navigation
+$nav-item-width: 120px; // Largeur fixe pour les onglets
+$nav-item-height: 40px; // Hauteur fixe pour les onglets

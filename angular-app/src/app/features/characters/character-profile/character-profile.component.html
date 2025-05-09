@@ -1,0 +1,118 @@
+<!-- src/app/features/characters/character-profile/character-profile.component.html -->
+<div class="character-profile-container">
+  <div class="character-profile-header">
+    <a routerLink="/characters" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Retour à la liste
+    </a>
+  </div>
+  
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+  
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  
+  <div *ngIf="loading" class="loading-spinner">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+  </div>
+  
+  <div *ngIf="!loading && character" class="character-card">
+    <div class="character-header">
+      <h2>{{ character.name }}</h2>
+      <div class="character-badges">
+        <span class="badge" [ngClass]="character.type === 'warrior' ? 'badge-warrior' : 'badge-mage'">
+          {{ character.type === 'warrior' ? 'Guerrier' : 'Mage' }}
+        </span>
+        <span class="badge badge-level">Niveau {{ character.level }}</span>
+        <span *ngIf="isActive" class="badge badge-active">Personnage actif</span>
+      </div>
+      
+      <!-- Bouton pour sélectionner le personnage s'il n'est pas actif -->
+      <button *ngIf="!isActive" class="btn btn-success mt-2" (click)="selectCharacter()">
+        <i class="bi bi-check-circle"></i> Sélectionner ce personnage
+      </button>
+    </div>
+    
+    <div class="character-info">
+      <div class="character-avatar">
+        <!-- Avatar placeholder, you can replace with actual images based on class/race -->
+        <div class="avatar-placeholder" [ngClass]="character.type === 'warrior' ? 'avatar-warrior' : 'avatar-mage'">
+          <i class="bi" [ngClass]="character.type === 'warrior' ? 'bi-shield-fill' : 'bi-magic'"></i>
+        </div>
+        <p class="race-name">{{ character.race }}</p>
+      </div>
+      
+      <div class="character-stats">
+        <h3>Statistiques</h3>
+        
+        <div class="stat-container">
+          <div class="stat-label">Santé</div>
+          <div class="progress">
+            <div class="progress-bar bg-danger" [style.width.%]="character.health"></div>
+          </div>
+          <div class="stat-value">{{ character.health }}/100</div>
+        </div>
+        
+        <div class="stat-container">
+          <div class="stat-label">Attaque</div>
+          <div class="progress">
+            <div class="progress-bar bg-primary" [style.width.%]="character.attack * 5"></div>
+          </div>
+          <div class="stat-value">{{ character.attack }}</div>
+        </div>
+        
+        <div class="stat-container">
+          <div class="stat-label">Défense</div>
+          <div class="progress">
+            <div class="progress-bar bg-success" [style.width.%]="character.defense * 10"></div>
+          </div>
+          <div class="stat-value">{{ character.defense }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Ajout d'une section pour les modes de jeu -->
+    <div class="character-actions">
+      <h3>Actions disponibles</h3>
+      
+      <!-- Button pour accéder à l'inventaire -->
+      <div class="action-group">
+        <button class="btn btn-primary" routerLink="/inventory">
+          <i class="bi bi-briefcase"></i> Voir l'inventaire
+        </button>
+      </div>
+      
+      <!-- Boutons pour les modes de jeu -->
+      <div class="game-modes">
+        <h4>Modes de jeu</h4>
+        <div class="game-buttons">
+          <button class="btn btn-success" (click)="goToGameMode('quests')">
+            <i class="bi bi-journal-text"></i> Quêtes
+          </button>
+          
+          <button class="btn btn-info" (click)="goToGameMode('board-game')">
+            <i class="bi bi-dice-6"></i> Plateau de jeu
+          </button>
+          
+          <button class="btn btn-warning" (click)="goToGameMode('versus')">
+            <i class="bi bi-lightning-charge"></i> Versus
+          </button>
+        </div>
+        <p *ngIf="!isActive" class="mt-2 text-muted">
+          <i class="bi bi-info-circle"></i> Note: Si vous n'avez pas encore sélectionné ce personnage, il sera automatiquement défini comme personnage actif lorsque vous accéderez à un mode de jeu.
+        </p>
+      </div>
+      
+      <!-- Bouton pour retourner à la liste des personnages et en sélectionner un autre -->
+      <div class="action-group mt-4">
+        <a class="btn btn-outline-secondary" routerLink="/characters">
+          <i class="bi bi-people"></i> Choisir un autre personnage
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

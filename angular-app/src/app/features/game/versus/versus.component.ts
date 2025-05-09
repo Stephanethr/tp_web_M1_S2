@@ -1,100 +1,113 @@
 import { Component, OnInit } from '@angular/core';
-import { GameService } from 'src/app/core/services/game.service';
-import { CharacterService } from 'src/app/core/services/character.service';
-import { Character } from 'src/app/core/models/character.model';
-import { FightResult } from 'src/app/core/models/game.model';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule, Router } from '@angular/router';
+import { GameService } from '../../../core/services/game.service';
+import { CharacterService } from '../../../core/services/character.service';
+import { Character } from '../../../core/models/character.model';
 
 @Component({
   selector: 'app-versus',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './versus.component.html',
   styleUrls: ['./versus.component.scss']
 })
 export class VersusComponent implements OnInit {
   characters: Character[] = [];
-  loading = false;
-  error = '';
   player1Id: number | null = null;
   player2Id: number | null = null;
-  fightResult: FightResult | null = null;
-  showResult = false;
+  fightResult: any = null;
+  loading: boolean = false;
+  errorMessage: string = '';
+  successMessage: string = '';
 
   constructor(
     private gameService: GameService,
     private characterService: CharacterService,
-    private authService: AuthService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    // Check if user has an active character
-    if (!this.authService.currentUserValue?.activeCharacterId) {
-      this.router.navigate(['/character/list'], { 
-        queryParams: { returnUrl: '/game/versus' } 
-      });
+  ngOnInit(): void {
+    // Vérifier si un personnage est sélectionné
+    const activeCharacter = this.characterService.getActiveCharacter();
+    
+    if (!activeCharacter) {
+      this.errorMessage = 'Vous devez sélectionner un personnage pour accéder au mode versus';
+      setTimeout(() => {
+        this.router.navigate(['/characters']);
+      }, 2000);
       return;
     }
     
+    this.player1Id = activeCharacter.id;
     this.loadCharacters();
   }
 
-  loadCharacters() {
+  loadCharacters(): void {
     this.loading = true;
-    this.characterService.getAllCharacters()
-      .subscribe(
-        data => {
-          this.characters = data;
-          this.loading = false;
+    this.errorMessage = '';
+    
+    this.characterService.getAllCharacters().subscribe({
+      next: (characters) => {
+        this.characters = characters;
+        
+        if (characters.length < 2) {
+          this.errorMessage = 'Vous avez besoin d\'au moins deux personnages pour le mode versus';
+        } else {
+          this.successMessage = 'Personnages chargés avec succès';
           
-          // Set active character as player 1 by default
-          const activeCharacterId = this.authService.currentUserValue?.activeCharacterId;
-          if (activeCharacterId) {
-            this.player1Id = activeCharacterId;
+          // Par défaut, sélectionner un adversaire différent du joueur 1
+          const opponents = characters.filter(char => char.id !== this.player1Id);
+          if (opponents.length > 0) {
+            this.player2Id = opponents[0].id;
           }
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to load characters';
-          this.loading = false;
         }
-      );
+        
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du chargement des personnages';
+        this.loading = false;
+      }
+    });
   }
 
-  startFight() {
+  getCharacterById(id: number): Character | undefined {
+    return this.characters.find(character => character.id === id);
+  }
+
+  startFight(): void {
     if (!this.player1Id || !this.player2Id) {
-      this.error = 'Please select both fighters';
+      this.errorMessage = 'Veuillez sélectionner deux personnages pour le combat';
       return;
     }
-    
+
     if (this.player1Id === this.player2Id) {
-      this.error = 'Please select two different characters';
+      this.errorMessage = 'Vous ne pouvez pas combattre contre vous-même. Veuillez sélectionner deux personnages différents.';
       return;
     }
-    
+
     this.loading = true;
-    this.showResult = false;
+    this.fightResult = null;
     
-    this.gameService.startVersus(this.player1Id, this.player2Id)
-      .subscribe(
-        result => {
-          this.fightResult = result;
-          this.showResult = true;
-          this.loading = false;
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to start fight';
-          this.loading = false;
+    this.gameService.startFight(this.player1Id, this.player2Id).subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.fightResult = result.result || result.battle_result;
+        } else {
+          this.errorMessage = result.message || 'Erreur lors du lancement du combat';
         }
-      );
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du lancement du combat';
+        this.loading = false;
+      }
+    });
   }
 
-  getCharacterName(id: number): string {
-    const character = this.characters.find(c => c.id === id);
-    return character ? character.name : '';
-  }
-
-  resetFight() {
-    this.showResult = false;
+  resetFight(): void {
     this.fightResult = null;
   }
 }

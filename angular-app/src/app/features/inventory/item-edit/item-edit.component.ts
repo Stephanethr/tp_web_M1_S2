@@ -1,142 +1,188 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { InventoryService } from 'src/app/core/services/inventory.service';
-import { Item, ItemType } from 'src/app/core/models/item.model';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { InventoryService } from '../../../core/services/inventory.service';
+import { ItemTypeModel } from '../../../core/models/item.model';
+import { ItemType, getItemTypeName, getItemTypeClass, getItemTypeIcon } from '../../../core/models/item-types.enum';
 
 @Component({
   selector: 'app-item-edit',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './item-edit.component.html',
   styleUrls: ['./item-edit.component.scss']
 })
 export class ItemEditComponent implements OnInit {
-  itemForm!: FormGroup;
-  loading = false;
-  submitted = false;
-  error = '';
-  isAddMode = true;
-  itemId?: number;
-  itemTypes: ItemType[] = [];
-
+  itemForm: FormGroup;
+  itemTypes: ItemTypeModel[] = [];
+  loading: boolean = false;
+  errorMessage: string = '';
+  successMessage: string = '';
+  isEditMode: boolean = false;
+  itemId: number | null = null;
+  
+  // Rendre l'énumération accessible dans le template
+  itemTypeEnum = ItemType;
+  
+  // Array avec tous les types d'objets disponibles, en cas de défaillance de l'API
+  defaultItemTypes: ItemTypeModel[] = [
+    { id: ItemType.WEAPON, type_name: getItemTypeName(ItemType.WEAPON) },
+    { id: ItemType.ARMOR, type_name: getItemTypeName(ItemType.ARMOR) },
+    { id: ItemType.POTION, type_name: getItemTypeName(ItemType.POTION) },
+    { id: ItemType.PLANT, type_name: getItemTypeName(ItemType.PLANT) },
+    { id: ItemType.KEY, type_name: getItemTypeName(ItemType.KEY) }
+  ];
+  
   constructor(
-    private formBuilder: FormBuilder,
-    private route: ActivatedRoute,
-    private router: Router,
+    private fb: FormBuilder,
     private inventoryService: InventoryService,
-    private authService: AuthService
-  ) {}
-
-  ngOnInit() {
-    this.itemId = this.route.snapshot.params['id'];
-    this.isAddMode = !this.itemId;
-    
-    // Check if user has an active character
-    if (!this.authService.currentUserValue?.activeCharacterId) {
-      this.router.navigate(['/character/list'], { 
-        queryParams: { returnUrl: this.isAddMode ? '/add-item' : `/edit/${this.itemId}` } 
-      });
-      return;
-    }
-
-    // Load item types
-    this.inventoryService.getItemTypes()
-      .subscribe(
-        types => {
-          this.itemTypes = types;
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to load item types';
-        }
-      );
-    
-    this.itemForm = this.formBuilder.group({
-      name: ['', [Validators.required, Validators.minLength(2)]],
-      typeId: ['', Validators.required],
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.itemForm = this.fb.group({
+      name: ['', Validators.required],
+      type_id: ['', Validators.required],
       quantity: [1, [Validators.required, Validators.min(1)]]
     });
+  }
 
-    if (!this.isAddMode) {
-      this.loadItem();
+  ngOnInit(): void {
+    this.loadItemTypes();
+    
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.itemId = +id;
+      this.loadItemDetails(this.itemId);
+    } else {
+      // Par défaut, sélectionner le premier type d'objet (Arme)
+      this.itemForm.get('type_id')?.setValue(ItemType.WEAPON);
     }
   }
 
-  // Convenience getter for easy access to form fields
-  get f() { return this.itemForm.controls; }
+  loadItemTypes(): void {
+    this.inventoryService.getItemTypes().subscribe({
+      next: (types) => {
+        if (types && types.length > 0) {
+          this.itemTypes = types;
+        } else {
+          // Si l'API ne renvoie pas de types, utiliser les types par défaut
+          this.itemTypes = this.defaultItemTypes;
+        }
+        
+        // Si nous sommes en mode création, sélectionner le premier type par défaut
+        if (!this.isEditMode && !this.itemForm.get('type_id')?.value && this.itemTypes.length > 0) {
+          this.itemForm.get('type_id')?.setValue(this.itemTypes[0].id);
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des types d\'objets :', error);
+        // En cas d'erreur, utiliser les types par défaut
+        this.itemTypes = this.defaultItemTypes;
+        
+        // Et sélectionner le premier type par défaut
+        if (!this.isEditMode && !this.itemForm.get('type_id')?.value) {
+          this.itemForm.get('type_id')?.setValue(this.itemTypes[0].id);
+        }
+      }
+    });
+  }
 
-  loadItem() {
+  loadItemDetails(itemId: number): void {
     this.loading = true;
-    // Assuming you have a method to get an item by ID
-    this.inventoryService.getInventory()
-      .subscribe(
-        items => {
-          const item = items.find(i => i.id === this.itemId);
+    // Récupérer les détails de l'objet à modifier
+    this.inventoryService.getInventory().subscribe({
+      next: (response) => {
+        if (response.success) {
+          const item = response.items?.find((i: any) => i.id === itemId);
           if (item) {
             this.itemForm.patchValue({
               name: item.name,
-              typeId: item.typeId,
+              type_id: item.type_id,
               quantity: item.quantity
             });
           } else {
-            this.error = 'Item not found';
+            this.errorMessage = 'Objet non trouvé';
           }
-          this.loading = false;
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to load item';
-          this.loading = false;
+        } else {
+          this.errorMessage = response.message || 'Erreur lors du chargement des détails de l\'objet';
         }
-      );
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du chargement des détails de l\'objet';
+        this.loading = false;
+      }
+    });
   }
 
-  onSubmit() {
-    this.submitted = true;
+  getItemTypeName(typeId: number): string {
+    // D'abord, chercher dans les types récupérés de l'API
+    const apiType = this.itemTypes.find(type => type.id === typeId);
+    if (apiType) {
+      return apiType.type_name;
+    }
+    
+    // Si non trouvé, utiliser la fonction d'énumération
+    return getItemTypeName(typeId as ItemType);
+  }
 
-    // Stop here if form is invalid
+  getItemTypeClass(typeId: number): string {
+    return getItemTypeClass(typeId as ItemType);
+  }
+  
+  getItemTypeIcon(typeId: number): string {
+    return getItemTypeIcon(typeId as ItemType);
+  }
+
+  onSubmit(): void {
     if (this.itemForm.invalid) {
       return;
     }
 
     this.loading = true;
-    
-    const item: Item = {
-      characterId: this.authService.currentUserValue!.activeCharacterId!,
-      name: this.f['name'].value,
-      typeId: this.f['typeId'].value,
-      quantity: this.f['quantity'].value
-    };
+    this.errorMessage = '';
+    this.successMessage = '';
 
-    if (this.isAddMode) {
-      this.createItem(item);
+    const { name, type_id, quantity } = this.itemForm.value;
+
+    if (this.isEditMode && this.itemId) {
+      this.inventoryService.editItem(this.itemId, name, type_id, quantity).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.successMessage = 'Objet modifié avec succès';
+            setTimeout(() => {
+              this.router.navigate(['/inventory']);
+            }, 1500);
+          } else {
+            this.errorMessage = response.message || 'Erreur lors de la modification de l\'objet';
+            this.loading = false;
+          }
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Erreur lors de la modification de l\'objet';
+          this.loading = false;
+        }
+      });
     } else {
-      item.id = this.itemId;
-      this.updateItem(item);
+      this.inventoryService.addItem(name, type_id, quantity).subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.successMessage = 'Objet ajouté avec succès';
+            setTimeout(() => {
+              this.router.navigate(['/inventory']);
+            }, 1500);
+          } else {
+            this.errorMessage = response.message || 'Erreur lors de l\'ajout de l\'objet';
+            this.loading = false;
+          }
+        },
+        error: (error) => {
+          this.errorMessage = error.error?.message || 'Erreur lors de l\'ajout de l\'objet';
+          this.loading = false;
+        }
+      });
     }
-  }
-
-  private createItem(item: Item) {
-    this.inventoryService.addItem(item)
-      .subscribe(
-        () => {
-          this.router.navigate(['/inventory']);
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to add item';
-          this.loading = false;
-        }
-      );
-  }
-
-  private updateItem(item: Item) {
-    this.inventoryService.updateItem(item)
-      .subscribe(
-        () => {
-          this.router.navigate(['/inventory']);
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to update item';
-          this.loading = false;
-        }
-      );
   }
 }

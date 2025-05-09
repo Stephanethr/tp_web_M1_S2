@@ -1,74 +1,118 @@
 import { Component, OnInit } from '@angular/core';
-import { GameService } from 'src/app/core/services/game.service';
-import { FightResult } from 'src/app/core/models/game.model';
-import { Router } from '@angular/router';
-import { AuthService } from 'src/app/core/services/auth.service';
+import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
+import { GameService } from '../../../core/services/game.service';
+import { CharacterService } from '../../../core/services/character.service';
+import { Character } from '../../../core/models/character.model';
 
 @Component({
   selector: 'app-quests',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './quests.component.html',
   styleUrls: ['./quests.component.scss']
 })
 export class QuestsComponent implements OnInit {
-  quests = [
-    { id: 1, name: 'Forest Adventure', description: 'Face the Forest Monster in this beginner quest.', difficulty: 'Easy', reward: 'Health Potion', enemyLevel: 1 },
-    { id: 2, name: 'Cave Expedition', description: 'Descend into the dark cave and defeat the Cave Troll.', difficulty: 'Medium', reward: 'Steel Sword', enemyLevel: 3 },
-    { id: 3, name: 'Dragon\'s Lair', description: 'Challenge the mighty Dragon in its lair. Only for the bravest heroes!', difficulty: 'Hard', reward: 'Dragon Scale Armor', enemyLevel: 5 }
-  ];
+  character: Character | null = null;
+  quests: any[] = [];
+  loading: boolean = false;
+  errorMessage: string = '';
+  successMessage: string = '';
+  questResult: any = null;
   
-  loading = false;
-  error = '';
-  selectedQuest: any = null;
-  fightResult: FightResult | null = null;
-  showResult = false;
-
   constructor(
     private gameService: GameService,
-    private authService: AuthService,
+    private characterService: CharacterService,
     private router: Router
   ) {}
 
-  ngOnInit() {
-    // Check if user has an active character
-    if (!this.authService.currentUserValue?.activeCharacterId) {
-      this.router.navigate(['/character/list'], { 
-        queryParams: { returnUrl: '/game/quests' } 
-      });
+  ngOnInit(): void {
+    // Vérifier si un personnage est sélectionné
+    this.character = this.characterService.getActiveCharacter();
+    
+    if (!this.character) {
+      this.errorMessage = 'Vous devez sélectionner un personnage pour accéder aux quêtes';
+      setTimeout(() => {
+        this.router.navigate(['/characters']);
+      }, 2000);
       return;
     }
-  }
-
-  startQuest(quest: any) {
-    this.loading = true;
-    this.selectedQuest = quest;
-    this.showResult = false;
     
-    this.gameService.startQuest(quest.id)
-      .subscribe(
-        result => {
-          this.fightResult = result;
-          this.showResult = true;
-          this.loading = false;
-        },
-        error => {
-          this.error = error?.error?.message || 'Failed to start quest';
-          this.loading = false;
+    this.loadQuestData();
+  }
+
+  loadQuestData(): void {
+    this.loading = true;
+    this.errorMessage = '';
+    
+    this.gameService.startQuestMode().subscribe({
+      next: (data) => {
+        if (data.success) {
+          this.quests = data.quests || [];
+          // Si le backend renvoie un personnage, utiliser ses infos
+          if (data.character) {
+            // Mettre à jour localement avec les données du serveur
+            this.character = {
+              ...this.character!,  // Conserver les données locales
+              ...data.character    // Mais mettre à jour avec les données du serveur
+            };
+          }
+          this.successMessage = 'Quêtes chargées avec succès!';
+        } else {
+          this.errorMessage = data.message || 'Erreur lors du chargement des quêtes';
+          
+          // Si le problème est lié au personnage actif, tenter de le gérer
+          if (data.message && data.message.includes('personnage actif')) {
+            this.errorMessage = 'Veuillez sélectionner un personnage dans la liste des personnages';
+            setTimeout(() => {
+              this.router.navigate(['/characters']);
+            }, 2000);
+          }
         }
-      );
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du chargement des quêtes';
+        this.loading = false;
+        
+        // Gestion spécifique de l'erreur d'absence de personnage actif
+        if (error.error?.message && error.error.message.includes('personnage actif')) {
+          this.errorMessage = 'Veuillez sélectionner un personnage dans la liste des personnages';
+          setTimeout(() => {
+            this.router.navigate(['/characters']);
+          }, 2000);
+        }
+      }
+    });
   }
 
-  getDifficultyClass(difficulty: string): string {
-    switch (difficulty) {
-      case 'Easy': return 'text-success';
-      case 'Medium': return 'text-warning';
-      case 'Hard': return 'text-danger';
-      default: return '';
+  startQuest(questId: number): void {
+    if (!this.character) {
+      this.errorMessage = 'Vous devez sélectionner un personnage pour démarrer une quête';
+      return;
     }
+
+    this.loading = true;
+    this.questResult = null;
+    
+    this.gameService.startQuest(questId).subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.questResult = result;
+        } else {
+          this.errorMessage = result.message || 'Erreur lors du lancement de la quête';
+        }
+        this.loading = false;
+      },
+      error: (error) => {
+        this.errorMessage = error.error?.message || 'Erreur lors du lancement de la quête';
+        this.loading = false;
+      }
+    });
   }
 
-  resetQuest() {
-    this.showResult = false;
-    this.fightResult = null;
-    this.selectedQuest = null;
+  resetQuest(): void {
+    this.questResult = null;
+    this.loadQuestData(); // Recharger les données pour avoir le personnage à jour
   }
 }

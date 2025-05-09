@@ -1,4 +1,4 @@
 export const environment = {
-    production: false,
-    apiUrl: 'http://localhost:3000' // Assurez-vous que cela correspond au port de votre backend Flask
-  };
+  production: false,
+  apiUrl: 'http://127.0.0.1:5000', // URL de votre API Flask
+};
