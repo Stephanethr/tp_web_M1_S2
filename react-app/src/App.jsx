@@ -6,6 +6,7 @@ import { InventoryProvider } from './context/InventoryContext';
 import { GameProvider } from './context/GameContext';
 import { VersusProvider } from './context/VersusContext';
 import Navbar from './components/layout/Navbar';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 // Import des composants avec exports par défaut
 import Home from './pages/Home';
@@ -16,7 +17,6 @@ import CharacterCreate from './pages/characters/CharacterCreate';
 import CharacterDetail from './pages/characters/CharacterDetail';
 import InventoryPage from './pages/inventory/InventoryPage';
 import NotFound from './pages/NotFound';
-import GameModesPage from './pages/game/GameModesPage';
 import GameBoard from './pages/game/GameBoard';
 import GameVersus from './pages/game/GameVersus';
 import GameQuests from './pages/game/GameQuests';
@@ -35,7 +35,7 @@ function App() {
                   {/* Page d'accueil */}
                   <Route path="/" element={
                     <div className="container mx-auto px-4 py-8">
-                      <Home />
+                      <ProtectedRoute><Home /></ProtectedRoute>
                     </div>
                   } />
 
